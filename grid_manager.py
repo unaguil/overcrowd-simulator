@@ -54,6 +54,8 @@ class GridManager(object):
         for device in devices:
             circle = self.__create_circle(device)
 
+            common_cells = []
+            total_common = 0.0
             for row_index in range(self.rows):
                 for column_index in range(self.columns):
                     cell = self[row_index, column_index]
@@ -61,7 +63,13 @@ class GridManager(object):
                     common = circle.intersection(box)
 
                     if not common.is_empty:
-                        cell.occupation += common.area / circle.area
+                        common_cells.append((cell, common.area ))
+                        total_common += common.area
+
+            missing = (circle.area - total_common) / circle.area
+            for cell, common_area in common_cells:
+                cell_ratio = common_area / float(total_common)
+                cell.occupation += common_area / circle.area + cell_ratio * missing
 
     def __getitem__(self, index):
         return self.cells[index[0]][index[1]]

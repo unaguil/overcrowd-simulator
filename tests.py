@@ -79,6 +79,17 @@ class TestGridManager(unittest.TestCase):
                 expected_avg_density = len(devices) / float(grid_manager.n_cells[0] * grid_manager.n_cells[1])
                 self.assertTrue(expected_avg_density, grid_manager.density_matrix.mean())
 
+    def test_wall_close_density(self):
+        grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
+
+        devices = [
+            Device("0", (0.0, 0.0), 1.0)
+        ]
+
+        grid_manager.update(devices)
+
+        self.assertTrue(numpy.isclose(1.0, grid_manager.occupation_matrix.sum()))
+
     def test_occupation_matrix(self):
         grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
 
