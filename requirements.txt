@@ -1,2 +1,2 @@
--e git+https://github.com/panisson/pymobility.git#egg=pymobility
+-e git+https://github.com/unaguil/pymobility.git#egg=pymobility
 Shapely==1.5.12
