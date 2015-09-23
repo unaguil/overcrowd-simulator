@@ -1,13 +1,13 @@
 import random
 
-class Device:
+class Device(object):
 
     def __init__(self, id):
         self.id = id
         self.position = None
         self.accuracy = None
 
-class DeviceGenerator:
+class DeviceGenerator(object):
 
     def __init__(self, mobility_model, accuracy=(0.0, 50.0)):
         self.devices = {}
