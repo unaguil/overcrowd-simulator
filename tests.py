@@ -12,12 +12,13 @@ class TestDeviceGenerator(unittest.TestCase):
      for i in range(10):
          devices = next(devices_gen)
          self.assertEqual(200, len(devices))
-         device = devices.values()[0]
 
-         self.assertTrue(0 <= device.position[0] <= 100)
-         self.assertTrue(0 <= device.position[1] <= 100)
+         for node_id, device in devices.items():
 
-         self.assertTrue(20.0 <= device.accuracy <= 30.0)
+             self.assertTrue(0 <= device.position[0] <= 100)
+             self.assertTrue(0 <= device.position[1] <= 100)
+
+             self.assertTrue(20.0 <= device.accuracy <= 30.0)
 
 if __name__ == '__main__':
     unittest.main()
