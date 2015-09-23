@@ -90,6 +90,17 @@ class TestGridManager(unittest.TestCase):
 
         self.assertTrue(numpy.isclose(1.0, grid_manager.occupation_matrix.sum()))
 
+    def test_outside_area(self):
+        grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
+
+        devices = [
+            Device("0", (-2.0, -2.0), 5.0)
+        ]
+
+        grid_manager.update(devices)
+
+        self.assertTrue(numpy.isclose(1.0, grid_manager.occupation_matrix.sum()))
+
     def test_occupation_matrix(self):
         grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
 
