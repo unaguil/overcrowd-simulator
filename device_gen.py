@@ -2,10 +2,10 @@ import random
 
 class Device(object):
 
-    def __init__(self, id):
+    def __init__(self, id, position=None, accuracy=None):
         self.id = id
-        self.position = None
-        self.accuracy = None
+        self.position = position
+        self.accuracy = accuracy
 
 class DeviceGenerator(object):
 
