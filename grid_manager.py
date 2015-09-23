@@ -1,5 +1,5 @@
 import shapely.geometry as geometry
-import StringIO
+from io import StringIO
 import numpy
 
 class Cell(object):
