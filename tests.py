@@ -53,30 +53,31 @@ class TestGridManager(unittest.TestCase):
                 self.assertEquals(expected_box, grid_manager[i, j].box)
 
     def test_grid(self):
-        dimensions = (6, 6)
+        dimensions_list = [(6, 6), (12, 12), (24, 24), (150, 150), (200, 200)]
         cell_sizes = [(6, 6), (12, 12), (24, 24)]
-        for n_cells in cell_sizes:
-            grid_manager = GridManager(dimensions=dimensions, n_cells=n_cells)
+        for dimensions in dimensions_list:
+            for n_cells in cell_sizes:
+                grid_manager = GridManager(dimensions=dimensions, n_cells=n_cells)
 
-            devices = [
-                Device("0", (1.0, 1.0), 1.0),
-                Device("1", (3.0, 3.0), 1.0),
-                Device("3", (2.0, 2.0), 1.0),
-                Device("2", (5.0, 5.0), 1.0),
-            ]
+                devices = [
+                    Device("0", (1.0, 1.0), 1.0),
+                    Device("1", (3.0, 3.0), 1.0),
+                    Device("3", (2.0, 2.0), 1.0),
+                    Device("2", (5.0, 5.0), 1.0),
+                ]
 
-            grid_manager.update(devices)
+                grid_manager.update(devices)
 
-            self.assertEquals(n_cells, grid_manager.shape)
-            self.assertEquals(n_cells[0], grid_manager.rows)
-            self.assertEquals(n_cells[1], grid_manager.columns)
-            cell_area = dimensions[0] / float(n_cells[0]) * dimensions[1] / float(n_cells[1])
-            self.assertTrue(numpy.isclose(cell_area, grid_manager.cell_area))
+                self.assertEquals(n_cells, grid_manager.shape)
+                self.assertEquals(n_cells[0], grid_manager.rows)
+                self.assertEquals(n_cells[1], grid_manager.columns)
+                cell_area = dimensions[0] / float(n_cells[0]) * dimensions[1] / float(n_cells[1])
+                self.assertTrue(numpy.isclose(cell_area, grid_manager.cell_area))
 
-            self.assertTrue(numpy.isclose(len(devices), grid_manager.occupation_matrix.sum()))
+                self.assertTrue(numpy.isclose(len(devices), grid_manager.occupation_matrix.sum()))
 
-            expected_avg_density = len(devices) / float(grid_manager.n_cells[0] * grid_manager.n_cells[1])
-            self.assertTrue(expected_avg_density, grid_manager.density_matrix.mean())
+                expected_avg_density = len(devices) / float(grid_manager.n_cells[0] * grid_manager.n_cells[1])
+                self.assertTrue(expected_avg_density, grid_manager.density_matrix.mean())
 
     def test_occupation_matrix(self):
         grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
