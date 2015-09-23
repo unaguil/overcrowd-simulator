@@ -1,8 +1,22 @@
 
 class Cell(object):
 
-    def __init__(self):
+    def __init__(self, manager, position):
+        self.manager = manager
+        self.position = position
+
         self.density = 0.0
+
+    @property
+    def box(self):
+        coords = (
+            self.position[0],
+            self.position[1],
+            self.position[0] + self.manager.cell_dimensions[0],
+            self.position[1] + self.manager.cell_dimensions[1]
+        )
+
+        return coords
 
 class GridManager(object):
 
@@ -19,7 +33,11 @@ class GridManager(object):
         for row_index in range(self.n_cells[0]):
             row = []
             for column_index in range(self.n_cells[1]):
-                row.append(Cell())
+                position = (
+                    row_index * self.cell_dimensions[0],
+                    column_index * self.cell_dimensions[1]
+                )
+                row.append(Cell(self, position))
             self.cells.append(row)
 
     def update(devices):

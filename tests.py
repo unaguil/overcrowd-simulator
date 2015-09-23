@@ -41,5 +41,14 @@ class TestGridManager(unittest.TestCase):
             for j in range(grid_manager.columns):
                 self.assertEquals(0.0, grid_manager[i, j].density)
 
+                expected_box = (
+                    i * grid_manager.cell_dimensions[0],
+                    j * grid_manager.cell_dimensions[1],
+                    i * grid_manager.cell_dimensions[0] + grid_manager.cell_dimensions[0],
+                    j * grid_manager.cell_dimensions[1] + grid_manager.cell_dimensions[1]
+                )
+
+                self.assertEquals(expected_box, grid_manager[i, j].box)
+
 if __name__ == '__main__':
     unittest.main()
