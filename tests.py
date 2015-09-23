@@ -41,7 +41,7 @@ class TestGridManager(unittest.TestCase):
 
         for i in range(grid_manager.rows):
             for j in range(grid_manager.columns):
-                self.assertEquals(0.0, grid_manager[i, j].density)
+                self.assertEquals(0.0, grid_manager[i, j].occupation)
 
                 expected_box = (
                     i * grid_manager.cell_dimensions[0],
@@ -52,18 +52,40 @@ class TestGridManager(unittest.TestCase):
 
                 self.assertEquals(expected_box, grid_manager[i, j].box)
 
-    def test_update(self):
-        grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
+    def test_grid(self):
+        dimensions = (6, 6)
+        cell_sizes = [(6, 6), (12, 12), (24, 24)]
+        for n_cells in cell_sizes:
+            grid_manager = GridManager(dimensions=dimensions, n_cells=n_cells)
 
-        self.assertEquals(6, grid_manager.rows)
-        self.assertEquals(6, grid_manager.columns)
-        self.assertEquals(1.0, grid_manager.cell_area)
+            devices = [
+                Device("0", (1.0, 1.0), 1.0),
+                Device("1", (3.0, 3.0), 1.0),
+                Device("3", (2.0, 2.0), 1.0),
+                Device("2", (5.0, 5.0), 1.0),
+            ]
+
+            grid_manager.update(devices)
+
+            self.assertEquals(n_cells, grid_manager.shape)
+            self.assertEquals(n_cells[0], grid_manager.rows)
+            self.assertEquals(n_cells[1], grid_manager.columns)
+            cell_area = dimensions[0] / float(n_cells[0]) * dimensions[1] / float(n_cells[1])
+            self.assertTrue(numpy.isclose(cell_area, grid_manager.cell_area))
+
+            self.assertTrue(numpy.isclose(len(devices), grid_manager.occupation_matrix.sum()))
+
+            expected_avg_density = len(devices) / float(grid_manager.n_cells[0] * grid_manager.n_cells[1])
+            self.assertTrue(expected_avg_density, grid_manager.density_matrix.mean())
+
+    def test_occupation_matrix(self):
+        grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
 
         devices = [
             Device("0", (1.0, 1.0), 1.0),
             Device("1", (3.0, 3.0), 1.0),
-            Device("2", (5.0, 5.0), 1.0),
-            Device("3", (2.0, 2.0), 1.0),
+            Device("2", (2.0, 2.0), 1.0),
+            Device("3", (5.0, 5.0), 1.0)
         ]
 
         grid_manager.update(devices)
@@ -77,7 +99,7 @@ class TestGridManager(unittest.TestCase):
             [ 0.  ,  0.  ,  0.  ,  0.  ,  0.25,  0.25]]
         )
 
-        self.assertTrue(numpy.allclose(expected_matrix, grid_manager.density_matrix))
+        self.assertTrue(numpy.allclose(expected_matrix, grid_manager.occupation_matrix))
 
 if __name__ == '__main__':
     unittest.main()

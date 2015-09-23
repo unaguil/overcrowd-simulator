@@ -8,7 +8,7 @@ class Cell(object):
         self.manager = manager
         self.position = position
 
-        self.density = 0.0
+        self.occupation = 0.0
 
     @property
     def box(self):
@@ -61,9 +61,7 @@ class GridManager(object):
                     common = circle.intersection(box)
 
                     if not common.is_empty:
-                        cell_prob = common.area / circle.area
-                        density = cell_prob / self.cell_area
-                        cell.density += density
+                        cell.occupation += common.area / circle.area
 
     def __getitem__(self, index):
         return self.cells[index[0]][index[1]]
@@ -72,15 +70,19 @@ class GridManager(object):
         self.cells[index[0]][index[1]] = value
 
     @property
-    def density_matrix(self):
+    def occupation_matrix(self):
         matrix = []
         for row_index in range(self.rows):
             row = []
             for column_index in range(self.columns):
-                row.append(self[row_index, column_index].density)
+                row.append(self[row_index, column_index].occupation)
             matrix.append(row)
 
         return numpy.array(matrix)
+
+    @property
+    def density_matrix(self):
+        return self.occupation_matrix / self.cell_area
 
     @property
     def rows(self):
@@ -89,6 +91,10 @@ class GridManager(object):
     @property
     def columns(self):
         return len(self.cells[0])
+
+    @property
+    def shape(self):
+        return (self.rows, self.columns)
 
     def __create_circle(self, device):
         p = geometry.point.Point(device.position)
