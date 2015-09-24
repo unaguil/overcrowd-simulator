@@ -11,7 +11,7 @@ def timeit(method):
         result = method(*args, **kw)
         end = time.time()
 
-        print '\'%s\' %.2f sec' % (method.__name__, end - start)
+        print('\'%s\' %.2f sec' % (method.__name__, end - start))
         return result
 
     return timed
