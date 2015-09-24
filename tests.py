@@ -140,5 +140,25 @@ class TestGridManager(unittest.TestCase):
 
         self.assertTrue(numpy.allclose(expected_matrix, grid_manager.occupation_matrix))
 
+    def test_check_density(self):
+        grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
+
+        devices = [
+            Device("0", (1.0, 1.0), 1.0),
+            Device("1", (3.0, 3.0), 1.0),
+            Device("2", (2.0, 2.0), 1.0),
+            Device("3", (5.0, 5.0), 1.0)
+        ]
+
+        grid_manager.update(devices)
+
+        expected_indices = [
+            (1, 1), (2, 2)
+        ]
+
+        indices = grid_manager.check_density(lambda x: x > 0.3)
+
+        self.assertTrue(numpy.array_equal(expected_indices, indices))
+
 if __name__ == '__main__':
     unittest.main()

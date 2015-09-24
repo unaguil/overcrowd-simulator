@@ -11,6 +11,10 @@ class Cell(object):
         self.occupation = 0.0
 
     @property
+    def density(self):
+        return self.occupation / self.manager.cell_area
+
+    @property
     def box(self):
         coords = (
             self.position[0],
@@ -103,6 +107,15 @@ class GridManager(object):
     @property
     def shape(self):
         return (self.rows, self.columns)
+
+    def check_density(self, f):
+        indices = []
+        for row_index in range(self.rows):
+            for column_index in range(self.columns):
+                if f(self[row_index, column_index].density):
+                    indices.append((row_index, column_index))
+
+        return indices
 
     def __create_circle(self, device):
         p = geometry.point.Point(device.position)
