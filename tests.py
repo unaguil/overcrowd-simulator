@@ -3,6 +3,7 @@ from device_gen import devices_generator, Device
 from grid_manager import GridManager
 import numpy
 import random
+import math
 
 class MockPositionGenerator(unittest.TestCase):
 
@@ -23,7 +24,7 @@ class MockPositionGenerator(unittest.TestCase):
 class TestDeviceGenerator(unittest.TestCase):
 
     def test_generation(self):
-        model = MockPositionGenerator(nr_nodes=200, dimensions=(100, 100))
+        model = MockPositionGenerator(nr_nodes=200, dimensions=(128, 128))
 
         devices_gen = devices_generator(model, accuracy=(20.0, 30.0))
 
@@ -34,8 +35,8 @@ class TestDeviceGenerator(unittest.TestCase):
             device_ids = set([])
             for node_id, device in devices.items():
                 device_ids.add(node_id)
-                self.assertTrue(0 <= device.position[0] <= 100)
-                self.assertTrue(0 <= device.position[1] <= 100)
+                self.assertTrue(0 <= device.position[0] <= 200)
+                self.assertTrue(0 <= device.position[1] <= 200)
 
                 self.assertTrue(20.0 <= device.accuracy <= 30.0)
 
@@ -45,16 +46,16 @@ class TestDeviceGenerator(unittest.TestCase):
 class TestGridManager(unittest.TestCase):
 
     def test_grid_manager(self):
-        grid_manager = GridManager(dimensions=(250, 100), n_cells=(100, 100))
+        grid_manager = GridManager(dimensions=(250, 250), n_cells=(128, 128))
 
-        self.assertEquals((250, 100), grid_manager.dimensions)
-        self.assertEquals(25000, grid_manager.area)
-        self.assertEquals((100, 100), grid_manager.n_cells)
-        self.assertEquals((2.5, 1.0), grid_manager.cell_dimensions)
-        self.assertEquals(2.5, grid_manager.cell_area)
+        self.assertEquals((250, 250), grid_manager.dimensions)
+        self.assertEquals(62500, grid_manager.area)
+        self.assertEquals((128, 128), grid_manager.n_cells)
+        self.assertEquals((1.953125, 1.953125), grid_manager.cell_dimensions)
+        self.assertEquals(3.814697265625, grid_manager.cell_area)
 
-        self.assertEquals(100, grid_manager.rows)
-        self.assertEquals(100, grid_manager.columns)
+        self.assertEquals(128, grid_manager.rows)
+        self.assertEquals(128, grid_manager.columns)
 
         for i in range(grid_manager.rows):
             for j in range(grid_manager.columns):
@@ -71,7 +72,7 @@ class TestGridManager(unittest.TestCase):
 
     def test_grid(self):
         dimensions_list = [(6, 6), (12, 12), (24, 24), (150, 150), (200, 200)]
-        cell_sizes = [(6, 6), (12, 12), (24, 24)]
+        cell_sizes = [(2, 2), (4, 4), (8, 8), (32, 32)]
         for dimensions in dimensions_list:
             for n_cells in cell_sizes:
                 grid_manager = GridManager(dimensions=dimensions, n_cells=n_cells)
@@ -98,7 +99,7 @@ class TestGridManager(unittest.TestCase):
                 self.assertTrue(expected_avg_density, grid_manager.density_matrix.mean())
 
     def test_wall_close_density(self):
-        grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
+        grid_manager = GridManager(dimensions=(4, 4), n_cells=(4, 4))
 
         devices = [
             Device("0", (0.0, 0.0), 1.0)
@@ -109,7 +110,7 @@ class TestGridManager(unittest.TestCase):
         self.assertTrue(numpy.isclose(1.0, grid_manager.occupation_matrix.sum()))
 
     def test_outside_area(self):
-        grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
+        grid_manager = GridManager(dimensions=(4, 4), n_cells=(4, 4))
 
         devices = [
             Device("0", (-2.0, -2.0), 5.0)
@@ -120,7 +121,7 @@ class TestGridManager(unittest.TestCase):
         self.assertTrue(numpy.isclose(1.0, grid_manager.occupation_matrix.sum()))
 
     def test_occupation_matrix(self):
-        grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
+        grid_manager = GridManager(dimensions=(8, 8), n_cells=(8, 8))
 
         devices = [
             Device("0", (1.0, 1.0), 1.0),
@@ -132,18 +133,20 @@ class TestGridManager(unittest.TestCase):
         grid_manager.update(devices)
 
         expected_matrix =  numpy.array(
-           [[ 0.25,  0.25,  0.  ,  0.  ,  0.  ,  0.  ],
-            [ 0.25,  0.5 ,  0.25,  0.  ,  0.  ,  0.  ],
-            [ 0.  ,  0.25,  0.5 ,  0.25,  0.  ,  0.  ],
-            [ 0.  ,  0.  ,  0.25,  0.25,  0.  ,  0.  ],
-            [ 0.  ,  0.  ,  0.  ,  0.  ,  0.25,  0.25],
-            [ 0.  ,  0.  ,  0.  ,  0.  ,  0.25,  0.25]]
+            [[ 0.25,  0.25,  0.  ,  0.  ,  0.  ,  0.  ,  0.  ,  0.  ],
+             [ 0.25,  0.5 ,  0.25,  0.  ,  0.  ,  0.  ,  0.  ,  0.  ],
+             [ 0.  ,  0.25,  0.5 ,  0.25,  0.  ,  0.  ,  0.  ,  0.  ],
+             [ 0.  ,  0.  ,  0.25,  0.25,  0.  ,  0.  ,  0.  ,  0.  ],
+             [ 0.  ,  0.  ,  0.  ,  0.  ,  0.25,  0.25,  0.  ,  0.  ],
+             [ 0.  ,  0.  ,  0.  ,  0.  ,  0.25,  0.25,  0.  ,  0.  ],
+             [ 0.  ,  0.  ,  0.  ,  0.  ,  0.  ,  0.  ,  0.  ,  0.  ],
+             [ 0.  ,  0.  ,  0.  ,  0.  ,  0.  ,  0.  ,  0.  ,  0.  ]]
         )
 
         self.assertTrue(numpy.allclose(expected_matrix, grid_manager.occupation_matrix))
 
     def test_check_density(self):
-        grid_manager = GridManager(dimensions=(6, 6), n_cells=(6, 6))
+        grid_manager = GridManager(dimensions=(8, 8), n_cells=(8, 8))
 
         devices = [
             Device("0", (1.0, 1.0), 1.0),
@@ -165,7 +168,7 @@ class TestGridManager(unittest.TestCase):
         self.assertTrue(numpy.array_equal(expected_indices, indices))
 
     def test_check_occupation(self):
-        grid_manager = GridManager(dimensions=(6, 6), n_cells=(3, 3))
+        grid_manager = GridManager(dimensions=(8, 8), n_cells=(4, 4))
 
         devices = [
             Device("0", (3.0, 3.0), 1.0),
