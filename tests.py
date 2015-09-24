@@ -157,7 +157,25 @@ class TestGridManager(unittest.TestCase):
         ]
 
         indices = grid_manager.check_density(lambda x: x > 0.3)
+        self.assertTrue(numpy.array_equal(expected_indices, indices))
 
+        indices = grid_manager.check_occupation(lambda x: x > 0.3)
+        self.assertTrue(numpy.array_equal(expected_indices, indices))
+
+    def test_check_occupation(self):
+        grid_manager = GridManager(dimensions=(6, 6), n_cells=(3, 3))
+
+        devices = [
+            Device("0", (3.0, 3.0), 1.0),
+        ]
+
+        grid_manager.update(devices)
+
+        expected_indices = [
+            (1, 1)
+        ]
+
+        indices = grid_manager.check_occupation(lambda x: x >= 0.8)
         self.assertTrue(numpy.array_equal(expected_indices, indices))
 
 if __name__ == '__main__':

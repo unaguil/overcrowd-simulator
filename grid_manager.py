@@ -117,6 +117,15 @@ class GridManager(object):
 
         return indices
 
+    def check_occupation(self, f):
+        indices = []
+        for row_index in range(self.rows):
+            for column_index in range(self.columns):
+                if f(self[row_index, column_index].occupation):
+                    indices.append((row_index, column_index))
+
+        return indices
+
     def __create_circle(self, device):
         p = geometry.point.Point(device.position)
         c = p.buffer(device.accuracy)
