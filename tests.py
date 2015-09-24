@@ -48,6 +48,7 @@ class TestGridManager(unittest.TestCase):
         grid_manager = GridManager(dimensions=(250, 100), n_cells=(100, 100))
 
         self.assertEquals((250, 100), grid_manager.dimensions)
+        self.assertEquals(25000, grid_manager.area)
         self.assertEquals((100, 100), grid_manager.n_cells)
         self.assertEquals((2.5, 1.0), grid_manager.cell_dimensions)
         self.assertEquals(2.5, grid_manager.cell_area)
@@ -89,6 +90,7 @@ class TestGridManager(unittest.TestCase):
                 self.assertEquals(n_cells[1], grid_manager.columns)
                 cell_area = dimensions[0] / float(n_cells[0]) * dimensions[1] / float(n_cells[1])
                 self.assertTrue(numpy.isclose(cell_area, grid_manager.cell_area))
+                self.assertEquals(len(devices) / float(dimensions[0] * dimensions[1]), grid_manager.avg_density)
 
                 self.assertTrue(numpy.isclose(len(devices), grid_manager.occupation_matrix.sum()))
 

@@ -30,6 +30,7 @@ class GridManager(object):
     def __init__(self, dimensions, n_cells=(10, 10)):
         self.dimensions = dimensions
         self.n_cells = n_cells
+        self.area = float(self.dimensions[0] * self.dimensions[1])
 
         self.cell_dimensions = (
             dimensions[0] / float(n_cells[0]),
@@ -54,6 +55,8 @@ class GridManager(object):
 
     def update(self, devices):
         self.__clear_cells()
+
+        self.avg_density = len(devices) / self.area
 
         for device in devices:
             circle = self.__create_circle(device)
