@@ -1,6 +1,19 @@
 import shapely.geometry as geometry
 from io import StringIO
 import numpy
+import time
+
+def timeit(method):
+
+    def timed(*args, **kw):
+        start = time.time()
+        result = method(*args, **kw)
+        end = time.time()
+
+        print '\'%s\' %.2f sec' % (method.__name__, end - start)
+        return result
+
+    return timed
 
 class Cell(object):
 
@@ -53,6 +66,7 @@ class GridManager(object):
                 row.append(Cell(self, position))
             self.cells.append(row)
 
+    @timeit
     def update(self, devices):
         self.__clear_cells()
 
