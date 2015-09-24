@@ -7,7 +7,7 @@ import numpy
 
 ################################################################################
 ### Simulation configuration
-N_DEVICES = 1
+N_DEVICES = 20
 DIMENSIONS = (100, 100)
 VELOCITY = (0.1, 1.4)
 MAX_PAUSE_TIME = 10.0  # 10 seconds
