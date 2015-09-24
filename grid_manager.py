@@ -89,6 +89,58 @@ class GridManager(object):
                 cell_ratio = common_area / float(total_common)
                 cell.occupation += common_area / circle.area + cell_ratio * missing
 
+    def __split(self, dimensions, origin=(0, 0)):
+        cell_size = (dimensions[0] / 2.0, dimensions[1] / 2.0)
+        cells = (
+            (origin[0], origin[0], cell_size[0], cell_size[1]),
+            (cell_size[0], origin[0], cell_size[0] * 2, cell_size[1]),
+            (origin[0], cell_size[1], cell_size[0], cell_size[1] * 2),
+            (cell_size[1], cell_size[1], cell_size[0] * 2, cell_size[1] * 2)
+        )
+
+        return cells, cell_size
+
+    def __get_row_column(self, num):
+        if num == 0:
+            return (0, 0)
+        elif num == 1:
+            return (0, 1)
+        elif num == 2:
+            return (1, 0)
+        elif num == 3:
+            return (1, 1)
+
+    def __adjust_row_column(self, current, index):
+        adjusted = (
+            (current[0] * 2 + index[0][0], current[1] * 2 + index[0][1]),
+            index[1]
+        )
+
+        return adjusted
+
+    def __tree_intersection(self, shape, max_deep, dimensions, origin=(0, 0), n=0):
+        cells, cell_size = self.__split(dimensions, origin)
+
+        common_cells = []
+        for index, cell in enumerate(cells):
+            box = geometry.box(*cell)
+            common =  box.intersection(shape)
+            if not common.is_empty:
+                matrix_index = self.__get_row_column(index)
+                if n < max_deep:
+                    cell_origin = (cell[0], cell[1])
+                    for common_cell in self.__tree_intersection(shape, max_deep, cell_size, cell_origin, n + 1):
+                        common_cell = self.__adjust_row_column(matrix_index, common_cell)
+                        common_cells.append(common_cell)
+                else:
+                    common_cells.append((matrix_index, common.area))
+                    
+        return common_cells
+
+    def intersection(self, device, max_deep):
+        circle = self.__create_circle(device)
+        return self.__tree_intersection(circle, max_deep, self.dimensions)
+
     def __getitem__(self, index):
         return self.cells[index[0]][index[1]]
 

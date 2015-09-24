@@ -3,6 +3,7 @@ from device_gen import devices_generator, Device
 from grid_manager import GridManager
 import numpy
 import random
+import math
 
 class MockPositionGenerator(unittest.TestCase):
 
@@ -179,6 +180,17 @@ class TestGridManager(unittest.TestCase):
 
         indices = grid_manager.check_occupation(lambda x: x >= 0.8)
         self.assertTrue(numpy.array_equal(expected_indices, indices))
+
+    def test_intersection(self):
+        RADIUS = 1.0
+        for level in (0, 1, 2):
+            grid_manager = GridManager(dimensions=(6, 6), n_cells=(1, 1))
+
+            device = Device("0", (1.0, 1.0), RADIUS)
+
+            cells = grid_manager.intersection(device, level)
+
+            self.assertEquals(2**(2 * (level + 1)) / 4, len(cells))
 
 if __name__ == '__main__':
     unittest.main()
