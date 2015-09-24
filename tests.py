@@ -1,13 +1,29 @@
 import unittest
 from device_gen import devices_generator, Device
 from grid_manager import GridManager
-from pymobility.models.mobility import RandomWaypoint
 import numpy
+import random
+
+class MockPositionGenerator(unittest.TestCase):
+
+    def __init__(self, nr_nodes, dimensions):
+        self.nr_nodes = nr_nodes
+        self.dimensions = dimensions
+
+    def __iter__(self):
+        while True:
+            positions = []
+            for i in range(self.nr_nodes):
+                x = random.randint(0, self.dimensions[0])
+                y = random.randint(0, self.dimensions[1])
+                positions.append((x, y))
+
+            yield positions
 
 class TestDeviceGenerator(unittest.TestCase):
 
     def test_generation(self):
-        model = RandomWaypoint(200, dimensions=(100, 100), velocity=(0.1, 1.0), wt_max=1.0)
+        model = MockPositionGenerator(nr_nodes=200, dimensions=(100, 100))
 
         devices_gen = devices_generator(model, accuracy=(20.0, 30.0))
 
