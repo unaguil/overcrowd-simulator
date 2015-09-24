@@ -23,12 +23,6 @@ class Cell(object):
 
         self.occupation = 0.0
 
-    @property
-    def density(self):
-        return self.occupation / self.manager.cell_area
-
-    @property
-    def box(self):
         coords = (
             self.position[0],
             self.position[1],
@@ -36,7 +30,11 @@ class Cell(object):
             self.position[1] + self.manager.cell_dimensions[1]
         )
 
-        return coords
+        self.box = geometry.box(*coords)
+
+    @property
+    def density(self):
+        return self.occupation / self.manager.cell_area
 
 class GridManager(object):
 
@@ -80,8 +78,7 @@ class GridManager(object):
             for row_index in range(self.rows):
                 for column_index in range(self.columns):
                     cell = self[row_index, column_index]
-                    box = self.__create_box(cell.box)
-                    common = circle.intersection(box)
+                    common = circle.intersection(cell.box)
 
                     if not common.is_empty:
                         common_cells.append((cell, common.area ))
@@ -147,7 +144,3 @@ class GridManager(object):
         p = geometry.point.Point(device.position)
         c = p.buffer(device.accuracy)
         return c
-
-    def __create_box(self, box_coords):
-        box = geometry.box(*box_coords)
-        return box

@@ -67,7 +67,7 @@ class TestGridManager(unittest.TestCase):
                     j * grid_manager.cell_dimensions[1] + grid_manager.cell_dimensions[1]
                 )
 
-                self.assertEquals(expected_box, grid_manager[i, j].box)
+                self.assertEquals(expected_box, grid_manager[i, j].box.bounds)
 
     def test_grid(self):
         dimensions_list = [(6, 6), (12, 12), (24, 24), (150, 150), (200, 200)]
