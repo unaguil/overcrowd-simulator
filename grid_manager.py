@@ -99,6 +99,7 @@ class GridManager(object):
 
         return cells
 
+    @timeit
     def update(self, devices):
         self.__clear_cells()
 
