@@ -1,6 +1,6 @@
 import unittest
 from device_gen import devices_generator, Device
-from grid_manager import GridManager, BoxManager
+from grid_manager import GridManager
 import numpy
 import random
 import math
@@ -69,7 +69,7 @@ class TestGridManager(unittest.TestCase):
                     j * grid_manager.cell_dimensions[1] + grid_manager.cell_dimensions[1]
                 )
 
-                self.assertEquals(expected_box, grid_manager[i, j].bounds)
+                self.assertEquals(expected_box, grid_manager[i, j].box.bounds)
 
     def test_grid(self):
         dimensions_list = [(6, 6), (12, 12), (24, 24), (150, 150), (200, 200)]
@@ -183,39 +183,6 @@ class TestGridManager(unittest.TestCase):
 
         indices = grid_manager.check_occupation(lambda x: x >= 0.8)
         self.assertTrue(numpy.array_equal(expected_indices, indices))
-
-class TestBoxManager(unittest.TestCase):
-
-    def test_tree_creation(self):
-        for max_deep in range(5):
-            box_manager = BoxManager(dimensions=(100, 100), max_deep=max_deep)
-
-            keys = itertools.permutations(['0', '1', '2', '3'], max_deep + 1)
-            for key in keys:
-                key = ''.join(key)
-
-            self.assertTrue(key in box_manager.boxes)
-
-
-    def test_box_coordinates(self):
-        box_manager = BoxManager(dimensions=(100, 100), max_deep=0)
-
-        self.assertEquals((0.0, 0.0, 50.0, 50.0), box_manager['0'].bounds)
-        self.assertEquals((50.0, 0.0, 100.0, 50.0), box_manager['1'].bounds)
-        self.assertEquals((0.0, 50.0, 50.0, 100.0), box_manager['2'].bounds)
-        self.assertEquals((50.0, 50.0, 100.0, 100.0), box_manager['3'].bounds)
-
-        box_manager = BoxManager(dimensions=(100, 100), max_deep=1)
-
-        self.assertEquals((0.0, 0.0, 50.0, 50.0), box_manager['0'].bounds)
-        self.assertEquals((50.0, 0.0, 100.0, 50.0), box_manager['1'].bounds)
-        self.assertEquals((0.0, 50.0, 50.0, 100.0), box_manager['2'].bounds)
-        self.assertEquals((50.0, 50.0, 100.0, 100.0), box_manager['3'].bounds)
-
-        self.assertEquals((0.0, 0.0, 25.0, 25.0), box_manager['0', '0'].bounds)
-        self.assertEquals((25.0, 0.0, 50.0, 25.0), box_manager['0', '1'].bounds)
-        self.assertEquals((0.0, 25.0, 25.0, 50.0), box_manager['0', '2'].bounds)
-        self.assertEquals((25.0, 25.0, 50.0, 50.0), box_manager['0', '3'].bounds)
 
 if __name__ == '__main__':
     unittest.main()

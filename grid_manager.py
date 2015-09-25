@@ -3,6 +3,7 @@ import numpy
 import time
 import math
 from collections import defaultdict
+from rtree import index
 
 def timeit(method):
 
@@ -24,7 +25,7 @@ class Cell(object):
 
         self.occupation = 0.0
 
-        self.bounds = (
+        self.box = geometry.box(
             self.position[0],
             self.position[1],
             self.position[0] + self.manager.cell_dimensions[0],
@@ -39,42 +40,6 @@ class InvalidCellDivisionException(Exception):
 
     def __init__(self, message):
         super(InvalidCellDivisionException, self).__init__(message)
-
-class BoxManager(object):
-
-    def __init__(self, dimensions, max_deep):
-        self.boxes = {}
-        self.dimensions = dimensions
-        self.max_deep = max_deep
-
-        self.__generate_tree(self.max_deep, self.dimensions)
-
-    def __split(self, origin, dimensions):
-        cell_size = dimensions[0] / 2.0, dimensions[1] / 2.0
-
-        cells = (
-            (origin[0], origin[1], origin[0] + cell_size[0], origin[1] + cell_size[1]),
-            (origin[0] + cell_size[0], origin[1], origin[0] + cell_size[0] * 2, origin[1] + cell_size[1]),
-            (origin[0], origin[1] + cell_size[1], origin[0] + cell_size[0], origin[1] + cell_size[1] * 2),
-            (origin[0] + cell_size[1], origin[1] + cell_size[1], origin[0] + cell_size[0] * 2, origin[1] + cell_size[1] * 2)
-        )
-
-        return cells, cell_size
-
-    def __generate_tree(self, max_deep, dimensions, origin=(0, 0), n=0, t_indices=[]):
-        cells, cell_size = self.__split(origin, dimensions)
-        for index, cell in enumerate(cells):
-            new_t_indices = t_indices + [str(index)]
-            key = ''.join(new_t_indices)
-            self.boxes[key] = geometry.box(*cell)
-
-            if n < max_deep:
-                cell_origin = (cell[0], cell[1])
-                self.__generate_tree(max_deep, cell_size, cell_origin, n + 1, new_t_indices)
-
-    def __getitem__(self, t_indices):
-        key = ''.join(t_indices)
-        return self.boxes[key]
 
 class GridManager(object):
 
@@ -97,12 +62,17 @@ class GridManager(object):
         )
 
         self.cell_area = self.cell_dimensions[0] * self.cell_dimensions[1]
-
         self.cells = self.__create_cells()
 
-        self.__box_manager = BoxManager(self.dimensions, self.max_deep)
-
         self.checks = 0
+
+        self.idx = index.Index()
+
+        for row_index in range(self.n_cells[0]):
+            for column_index in range(self.n_cells[1]):
+                cell = self[row_index, column_index]
+                pos = row_index * self.rows + column_index
+                self.idx.insert(pos, cell.box.bounds)
 
     def __is_pow(self, index):
         return math.log(index[0], 2).is_integer() and math.log(index[1], 2).is_integer()
@@ -136,7 +106,15 @@ class GridManager(object):
 
         for device in devices:
             circle = self.__create_circle(device)
-            common_cells = self.__tree_intersection(circle, self.max_deep, self.dimensions)
+            cell_indices = self.idx.intersection(circle.bounds)
+
+            common_cells = []
+            for pos in cell_indices:
+                cell_index = (pos // self.columns,  pos % self.columns)
+                cell = self[cell_index]
+                common = cell.box.intersection(circle)
+                common_cells.append((cell_index, common.area))
+
             total_common = self.__total_cells_area(common_cells)
 
             missing = (circle.area - total_common) / circle.area
@@ -161,29 +139,6 @@ class GridManager(object):
         )
 
         return adjusted
-
-    def __tree_intersection(self, shape, max_deep, dimensions, origin=(0, 0), n=0, t_indices=[]):
-        common_cells = []
-        for index in range(4):
-            new_t_indices = t_indices + [str(index)]
-            box = self.__box_manager[new_t_indices]
-            cell = box.bounds
-            cell_size = (cell[2] - cell[0], cell[3] - cell[1])
-            self.checks += 1
-            if box.intersects(shape):
-                common = box.intersection(shape)
-                current_index = self.__get_row_column(index)
-                if n < max_deep:
-                    cell_origin = (cell[0], cell[1])
-                    for common_cell in self.__tree_intersection(shape, max_deep,
-                        cell_size, cell_origin, n + 1, new_t_indices):
-                        factor = max_deep - n
-                        common_cell = self.__adjust_row_column(current_index, common_cell, 2**factor)
-                        common_cells.append(common_cell)
-                else:
-                    common_cells.append((current_index, common.area))
-
-        return common_cells
 
     def __total_cells_area(self, cells):
         total_area = 0.0
