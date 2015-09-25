@@ -98,7 +98,7 @@ class GridManager(object):
 
         self.cell_area = self.cell_dimensions[0] * self.cell_dimensions[1]
 
-        self.__clear_cells()
+        self.cells = self.__create_cells()
 
         self.__box_manager = BoxManager(self.dimensions, self.max_deep)
 
@@ -109,7 +109,12 @@ class GridManager(object):
         return index[0] == index[1]
 
     def __clear_cells(self):
-        self.cells = []
+        for row in range(self.n_cells[0]):
+            for column in range(self.n_cells[1]):
+                self.cells[row][column].occupation = 0.0
+
+    def __create_cells(self):
+        cells = []
         for row_index in range(self.n_cells[0]):
             row = []
             for column_index in range(self.n_cells[1]):
@@ -118,9 +123,10 @@ class GridManager(object):
                     column_index * self.cell_dimensions[1]
                 )
                 row.append(Cell(self, position))
-            self.cells.append(row)
+            cells.append(row)
 
-    @timeit
+        return cells
+
     def update(self, devices):
         self.__clear_cells()
 
