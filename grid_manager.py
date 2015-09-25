@@ -62,17 +62,7 @@ class GridManager(object):
         )
 
         self.cell_area = self.cell_dimensions[0] * self.cell_dimensions[1]
-        self.cells = self.__create_cells()
-
-        self.checks = 0
-
-        self.idx = index.Index()
-
-        for row_index in range(self.n_cells[0]):
-            for column_index in range(self.n_cells[1]):
-                cell = self[row_index, column_index]
-                pos = row_index * self.rows + column_index
-                self.idx.insert(pos, cell.box.bounds)
+        self.__create_cells()
 
     def __is_pow(self, index):
         return math.log(index[0], 2).is_integer() and math.log(index[1], 2).is_integer()
@@ -86,7 +76,9 @@ class GridManager(object):
                 self.cells[row][column].occupation = 0.0
 
     def __create_cells(self):
-        cells = []
+        self.idx = index.Index()
+
+        self.cells = []
         for row_index in range(self.n_cells[0]):
             row = []
             for column_index in range(self.n_cells[1]):
@@ -94,10 +86,13 @@ class GridManager(object):
                     row_index * self.cell_dimensions[0],
                     column_index * self.cell_dimensions[1]
                 )
-                row.append(Cell(self, position))
-            cells.append(row)
 
-        return cells
+                cell = Cell(self, position)
+                pos = row_index * self.n_cells[0] + column_index
+                self.idx.insert(pos, cell.box.bounds)
+                row.append(cell)
+
+            self.cells.append(row)
 
     @timeit
     def update(self, devices):
@@ -109,14 +104,14 @@ class GridManager(object):
             circle = self.__create_circle(device)
             cell_indices = self.idx.intersection(circle.bounds)
 
+            total_common = 0
             common_cells = []
             for pos in cell_indices:
                 cell_index = (pos // self.columns,  pos % self.columns)
                 cell = self[cell_index]
                 common = cell.box.intersection(circle)
                 common_cells.append((cell_index, common.area))
-
-            total_common = self.__total_cells_area(common_cells)
+                total_common += common.area
 
             missing = (circle.area - total_common) / circle.area
             for cell_index, common_area in common_cells:

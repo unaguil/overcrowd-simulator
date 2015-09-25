@@ -89,7 +89,5 @@ if __name__ == '__main__':
         print "Running profiler with %d iterations" % args.profile
         cProfile.run('profile(devices_gen, grid_manager, args.profile)', 'stats')
 
-        print('Checked intersections %d' % grid_manager.checks)
-
         p = pstats.Stats('stats')
         p.strip_dirs().sort_stats('cumulative').print_stats()
