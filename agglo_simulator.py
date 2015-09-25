@@ -6,6 +6,7 @@ from pygame.locals import *
 import numpy
 import argparse
 import cProfile
+import pstats
 
 def profile(devices_gen, manager, num):
     for i in range(num):
@@ -85,4 +86,7 @@ if __name__ == '__main__':
             pygame.display.flip()
     else:
         print "Running profiler with %d iterations" % args.profile
-        cProfile.run('profile(devices_gen, grid_manager, args.profile)')
+        cProfile.run('profile(devices_gen, grid_manager, args.profile)', 'stats')
+
+        p = pstats.Stats('stats')
+        p.strip_dirs().sort_stats('cumulative').print_stats()
