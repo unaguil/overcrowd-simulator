@@ -102,6 +102,8 @@ class GridManager(object):
 
         self.__box_manager = BoxManager(self.dimensions, self.max_deep)
 
+        self.checks = 0
+
     def __is_pow(self, index):
         return math.log(index[0], 2).is_integer() and math.log(index[1], 2).is_integer()
 
@@ -167,6 +169,7 @@ class GridManager(object):
             box = self.__box_manager[new_t_indices]
             cell = box.bounds
             cell_size = (cell[2] - cell[0], cell[3] - cell[1])
+            self.checks += 1
             if box.intersects(shape):
                 common = box.intersection(shape)
                 current_index = self.__get_row_column(index)

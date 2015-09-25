@@ -18,6 +18,7 @@ def profile(devices_gen, manager, num):
 N_DEVICES = 20
 DIMENSIONS = (100, 100)
 VELOCITY = (0.1, 1.4)
+ACCURACY = (0.0, 3.0)
 MAX_PAUSE_TIME = 10.0  # 10 seconds
 N_CELLS = (128, 128)
 DENSITY_SCALE = (0.0, 0.2)
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     model = RandomWaypoint(nr_nodes=N_DEVICES, dimensions=DIMENSIONS,
         velocity=VELOCITY, wt_max=MAX_PAUSE_TIME)
 
-    devices_gen = devices_generator(model, accuracy=(0.0, 3.0))
+    devices_gen = devices_generator(model, accuracy=ACCURACY)
 
     print(description)
     print("============================")
@@ -87,6 +88,8 @@ if __name__ == '__main__':
     else:
         print "Running profiler with %d iterations" % args.profile
         cProfile.run('profile(devices_gen, grid_manager, args.profile)', 'stats')
+
+        print('Checked intersections %d' % grid_manager.checks)
 
         p = pstats.Stats('stats')
         p.strip_dirs().sort_stats('cumulative').print_stats()
