@@ -136,8 +136,8 @@ class GridManager(object):
         common_cells = []
         for index, cell in enumerate(cells):
             box = geometry.box(*cell)
-            common =  box.intersection(shape)
-            if not common.is_empty:
+            if box.intersects(shape):
+                common = box.intersection(shape)
                 current_index = self.__get_row_column(index)
                 if n < max_deep:
                     cell_origin = (cell[0], cell[1])
