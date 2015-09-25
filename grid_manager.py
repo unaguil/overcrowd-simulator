@@ -35,21 +35,11 @@ class Cell(object):
     def density(self):
         return self.occupation / self.manager.cell_area
 
-class InvalidCellDivisionException(Exception):
-
-    def __init__(self, message):
-        super(InvalidCellDivisionException, self).__init__(message)
-
 class GridManager(object):
 
     def __init__(self, dimensions, n_cells=(12, 12)):
         self.dimensions = dimensions
         self.n_cells = n_cells
-
-        if not self.__is_pow(n_cells):
-            raise InvalidCellDivisionException('Error. (%d, %d) is not a power of two.' % n_cells)
-        elif not self.__is_symmetric(n_cells):
-            raise InvalidCellDivisionException('Error. (%d, %d) is not symmetric.' % n_cells)
 
         self.area = float(self.dimensions[0] * self.dimensions[1])
 
@@ -62,12 +52,6 @@ class GridManager(object):
 
         self.cell_area = self.cell_dimensions[0] * self.cell_dimensions[1]
         self.__create_cells()
-
-    def __is_pow(self, index):
-        return math.log(index[0], 2).is_integer() and math.log(index[1], 2).is_integer()
-
-    def __is_symmetric(self, index):
-        return index[0] == index[1]
 
     def __clear_cells(self):
         for row in range(self.n_cells[0]):
