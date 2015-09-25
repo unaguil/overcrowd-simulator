@@ -6,6 +6,9 @@ import numpy
 import cProfile
 import pstats
 
+from rtree import index
+idx = index.Index()
+
 def __create_circle(position, radius):
     p = geometry.point.Point(position)
     c = p.buffer(radius)
@@ -32,30 +35,49 @@ def create_boxes():
     boxes = []
     for row in range(CELLS[0]):
         for column in range(CELLS[1]):
-            #new_box = affinity.translate(box, row * CELL_SIZE[0], column * CELL_SIZE[1])
-            new_box = geometry.box(0, 0, CELL_SIZE[0], CELL_SIZE[1])
+            new_box = geometry.box(
+                CELL_SIZE[0] * row,
+                CELL_SIZE[1] * column,
+                CELL_SIZE[0] + CELL_SIZE[0] * row,
+                CELL_SIZE[1] + CELL_SIZE[1] * column
+            )
+
             boxes.append(new_box)
 
     return boxes
 
-def profile():
-    check_times = []
-    checked_intersections = 0
+def no_index():
+    detected_intersections = 0
     for i in range(UPDATES):
         circles = create_circles()
         for circle in circles:
             for box in boxes:
-                start = time.time()
-                checked_intersections += 1
                 if circle.intersects(box):
-                    common = circle.intersection(box)
-                diff = time.time() - start
-                check_times.append(diff)
+                    detected_intersections += 1
 
-    print ("Checked intersections %d" % checked_intersections)
+    print ("Detected intersections %d" % detected_intersections)
+
+def check_intersections_index():
+    detected_intersections = 0
+    for i in range(UPDATES):
+        circles = create_circles()
+        for circle in circles:
+            for pos in idx.intersection(circle.bounds):
+                detected_intersections += 1
+
+    print("Detected intersections %d" % detected_intersections)
+
+def with_index():
+    print("Creating index")
+    for pos, cell in enumerate(boxes):
+        idx.insert(pos, cell.bounds)
+
+    print("Index created")
+
+    cProfile.run('check_intersections_index()', 'stats')
 
 if __name__ == '__main__':
-    CELLS = (128, 128)
+    CELLS = (256, 256)
     DIMENSIONS = (100, 100)
     CELL_SIZE = (DIMENSIONS[0] / float(CELLS[0]), DIMENSIONS[1] / float(CELLS[1]))
     CIRCLES = 20
@@ -72,7 +94,9 @@ if __name__ == '__main__':
     boxes = create_boxes()
     print("Box creation time %.4f" % (time.time() - start))
 
-    cProfile.run('profile()', 'stats')
+    print("Profiling...")
+#    cProfile.run('no_index()', 'stats')
+    with_index()
 
     p = pstats.Stats('stats')
     p.strip_dirs().sort_stats('cumulative').print_stats()
