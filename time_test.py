@@ -1,8 +1,6 @@
-import shapely.affinity as affinity
 import shapely.geometry as geometry
 import random
 import time
-import numpy
 import cProfile
 import pstats
 
@@ -30,8 +28,6 @@ def create_circles():
     return circles
 
 def create_boxes():
-    box = geometry.box(0, 0, CELL_SIZE[0], CELL_SIZE[1])
-
     boxes = []
     for row in range(CELLS[0]):
         for column in range(CELLS[1]):

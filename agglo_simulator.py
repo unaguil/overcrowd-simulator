@@ -2,8 +2,6 @@ from device_gen import devices_generator
 from pymobility.models.mobility import RandomWaypoint
 from grid_manager import GridManager
 import pygame
-from pygame.locals import *
-import numpy
 import argparse
 import cProfile
 import pstats

@@ -2,7 +2,6 @@ import shapely.geometry as geometry
 import numpy
 import time
 import math
-from collections import defaultdict
 from rtree import index
 
 def timeit(method):

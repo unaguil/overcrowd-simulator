@@ -3,8 +3,6 @@ from device_gen import devices_generator, Device
 from grid_manager import GridManager
 import numpy
 import random
-import math
-import itertools
 
 class MockPositionGenerator(unittest.TestCase):
 
