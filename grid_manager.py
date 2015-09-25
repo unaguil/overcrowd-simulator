@@ -1,8 +1,8 @@
 import shapely.geometry as geometry
-from io import StringIO
 import numpy
 import time
 import math
+from collections import defaultdict
 
 def timeit(method):
 
@@ -24,14 +24,12 @@ class Cell(object):
 
         self.occupation = 0.0
 
-        coords = (
+        self.bounds = (
             self.position[0],
             self.position[1],
             self.position[0] + self.manager.cell_dimensions[0],
             self.position[1] + self.manager.cell_dimensions[1]
         )
-
-        self.box = geometry.box(*coords)
 
     @property
     def density(self):
@@ -41,6 +39,42 @@ class InvalidCellDivisionException(Exception):
 
     def __init__(self, message):
         super(InvalidCellDivisionException, self).__init__(message)
+
+class BoxManager(object):
+
+    def __init__(self, dimensions, max_deep):
+        self.boxes = {}
+        self.dimensions = dimensions
+        self.max_deep = max_deep
+
+        self.__generate_tree(self.max_deep, self.dimensions)
+
+    def __split(self, origin, dimensions):
+        cell_size = dimensions[0] / 2.0, dimensions[1] / 2.0
+
+        cells = (
+            (origin[0], origin[1], origin[0] + cell_size[0], origin[1] + cell_size[1]),
+            (origin[0] + cell_size[0], origin[1], origin[0] + cell_size[0] * 2, origin[1] + cell_size[1]),
+            (origin[0], origin[1] + cell_size[1], origin[0] + cell_size[0], origin[1] + cell_size[1] * 2),
+            (origin[0] + cell_size[1], origin[1] + cell_size[1], origin[0] + cell_size[0] * 2, origin[1] + cell_size[1] * 2)
+        )
+
+        return cells, cell_size
+
+    def __generate_tree(self, max_deep, dimensions, origin=(0, 0), n=0, t_indices=[]):
+        cells, cell_size = self.__split(origin, dimensions)
+        for index, cell in enumerate(cells):
+            new_t_indices = t_indices + [str(index)]
+            key = ''.join(new_t_indices)
+            self.boxes[key] = geometry.box(*cell)
+
+            if n < max_deep:
+                cell_origin = (cell[0], cell[1])
+                self.__generate_tree(max_deep, cell_size, cell_origin, n + 1, new_t_indices)
+
+    def __getitem__(self, t_indices):
+        key = ''.join(t_indices)
+        return self.boxes[key]
 
 class GridManager(object):
 
@@ -65,6 +99,8 @@ class GridManager(object):
         self.cell_area = self.cell_dimensions[0] * self.cell_dimensions[1]
 
         self.__clear_cells()
+
+        self.__box_manager = BoxManager(self.dimensions, self.max_deep)
 
     def __is_pow(self, index):
         return math.log(index[0], 2).is_integer() and math.log(index[1], 2).is_integer()
@@ -100,18 +136,6 @@ class GridManager(object):
                 cell_ratio = common_area / float(total_common)
                 self[cell_index].occupation += common_area / circle.area + cell_ratio * missing
 
-    def __split(self, dimensions, origin=(0, 0)):
-        cell_size = dimensions[0] / 2.0, dimensions[1] / 2.0
-
-        cells = (
-            (origin[0], origin[1], origin[0] + cell_size[0], origin[1] + cell_size[1]),
-            (origin[0] + cell_size[0], origin[1], origin[0] + cell_size[0] * 2, origin[1] + cell_size[1]),
-            (origin[0], origin[1] + cell_size[1], origin[0] + cell_size[0], origin[1] + cell_size[1] * 2),
-            (origin[0] + cell_size[1], origin[1] + cell_size[1], origin[0] + cell_size[0] * 2, origin[1] + cell_size[1] * 2)
-        )
-
-        return cells, cell_size
-
     def __get_row_column(self, num):
         if num == 0:
             return (0, 0)
@@ -130,18 +154,20 @@ class GridManager(object):
 
         return adjusted
 
-    def __tree_intersection(self, shape, max_deep, dimensions, origin=(0, 0), n=0):
-        cells, cell_size = self.__split(dimensions, origin)
-
+    def __tree_intersection(self, shape, max_deep, dimensions, origin=(0, 0), n=0, t_indices=[]):
         common_cells = []
-        for index, cell in enumerate(cells):
-            box = geometry.box(*cell)
+        for index in range(4):
+            new_t_indices = t_indices + [str(index)]
+            box = self.__box_manager[new_t_indices]
+            cell = box.bounds
+            cell_size = (cell[2] - cell[0], cell[3] - cell[1])
             if box.intersects(shape):
                 common = box.intersection(shape)
                 current_index = self.__get_row_column(index)
                 if n < max_deep:
                     cell_origin = (cell[0], cell[1])
-                    for common_cell in self.__tree_intersection(shape, max_deep, cell_size, cell_origin, n + 1):
+                    for common_cell in self.__tree_intersection(shape, max_deep,
+                        cell_size, cell_origin, n + 1, new_t_indices):
                         factor = max_deep - n
                         common_cell = self.__adjust_row_column(current_index, common_cell, 2**factor)
                         common_cells.append(common_cell)
