@@ -1,3 +1,12 @@
+# APT dependencies
+# apt-get install libgeos-dev libspatialindex-dev libfreetype6-dev python-dev build-essential pygame
+
+# Create virtualenv
+# mkvirtualenv --system-site-packages env_name
+
+# Install requirements
+# pip install -r requirements.txt
+
 -e git+https://github.com/panisson/pymobility.git#egg=pymobility
 Shapely==1.5.12
 Rtree==0.8.2
