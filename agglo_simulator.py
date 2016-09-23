@@ -3,11 +3,6 @@ from pymobility.models.mobility import RandomWaypoint
 from grid_manager.grid_manager import GridManager
 import argparse
 
-def profile(devices_gen, manager, num):
-    for i in range(num):
-        devices = next(devices_gen)
-        manager.update(devices.values())
-
 ################################################################################
 ### Simulation configuration
 N_DEVICES = 20
@@ -34,11 +29,6 @@ def scale_color(density, density_scale):
 
 if __name__ == '__main__':
     description = 'Agglomeration simulator v0.1'
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('--profile', type=int, default=0,
-	                   	help='performs profiling instead showing density')
-
-    args = parser.parse_args()
 
     model = RandomWaypoint(nr_nodes=N_DEVICES, dimensions=DIMENSIONS,
         velocity=VELOCITY, wt_max=MAX_PAUSE_TIME)
