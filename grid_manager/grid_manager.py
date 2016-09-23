@@ -9,19 +9,13 @@ class Cell(object):
     def __init__(self, position, cell_dimensions):
         self.position = position
 
-        self.occupation = 0.0
-
         self.box = geometry.box(
             self.position[0],
             self.position[1],
             self.position[0] + cell_dimensions[0],
             self.position[1] + cell_dimensions[1]
         )
-
-    @property
-    def density(self):
-        return self.occupation / self.manager.cell_area
-
+        
 class GridManager(object):
 
     RTREE_PATH = '/tmp/rtree'
@@ -112,6 +106,7 @@ class GridManager(object):
         sumRDD = devicesRDD.reduceByKey(sum_matrix)
 
         self.occupation_matrix = sumRDD.collect()[0][1]
+        self.density_matrix = self.occupation_matrix / self.cell_area
 
     def __get_row_column(self, num):
         if num == 0:
@@ -145,10 +140,6 @@ class GridManager(object):
         self.cells[index[0]][index[1]] = value
 
     @property
-    def density_matrix(self):
-        return self.occupation_matrix / self.cell_area
-
-    @property
     def rows(self):
         return len(self.cells)
 
@@ -164,7 +155,7 @@ class GridManager(object):
         indices = []
         for row_index in range(self.rows):
             for column_index in range(self.columns):
-                if f(self[row_index, column_index].density):
+                if f(self.density_matrix[row_index, column_index]):
                     indices.append((row_index, column_index))
 
         return indices
@@ -173,11 +164,10 @@ class GridManager(object):
         indices = []
         for row_index in range(self.rows):
             for column_index in range(self.columns):
-                if f(self[row_index, column_index].occupation):
+                if f(self.occupation_matrix[row_index, column_index]):
                     indices.append((row_index, column_index))
 
         return indices
-
 
 def create_circle(device):
     p = geometry.point.Point(device.position)

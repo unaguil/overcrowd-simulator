@@ -59,8 +59,6 @@ class TestGridManager(sparkunittest.SparkTestCase):
 
         for i in range(grid_manager.rows):
             for j in range(grid_manager.columns):
-                self.assertEquals(0.0, grid_manager[i, j].occupation)
-
                 expected_box = (
                     i * grid_manager.cell_dimensions[0],
                     j * grid_manager.cell_dimensions[1],
