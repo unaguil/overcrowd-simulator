@@ -15,20 +15,6 @@ ACCURACY = (0.0, 3.0)
 MAX_PAUSE_TIME = 10.0  # 10 seconds
 N_CELLS = (6, 6)
 DENSITY_SCALE = (0.0, 0.2)
-################################################################################
-SCREEN_SIZE = (518, 518)
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-################################################################################
-
-def scale_color(density, density_scale):
-    scale = density_scale[1] - density_scale[0]
-    red_value = int(255 * density / float(scale))
-    if red_value > 255:
-        red_value = 255
-
-    return (red_value, 0, 0)
 
 if __name__ == '__main__':
     description = 'Agglomeration simulator v0.1'
@@ -53,8 +39,6 @@ if __name__ == '__main__':
     while not exit:
         devices = next(devices_gen)
         g_manager.update(devices.values())
-
-        # screen.fill(WHITE)
 
         density_matrix = g_manager.density_matrix
         print density_matrix
