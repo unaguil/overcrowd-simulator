@@ -2,6 +2,7 @@ import shapely.geometry as geometry
 import numpy
 from rtree import index
 from pyspark import SparkContext, SparkConf
+import os
 
 class Cell(object):
 
@@ -23,6 +24,9 @@ class Cell(object):
 
 class GridManager(object):
 
+    RTREE_PATH = '/tmp/rtree'
+    RTREE_FILES = ['.idx', '.dat']
+
     def __init__(self, spark_context, dimensions, n_cells=(12, 12)):
         self.sc = spark_context
         self.dimensions = dimensions
@@ -38,8 +42,14 @@ class GridManager(object):
         self.cell_area = self.cell_dimensions[0] * self.cell_dimensions[1]
         self.__create_cells()
 
+    def remove_rtree_files(self):
+        for extension in GridManager.RTREE_FILES:
+            if os.path.isfile(GridManager.RTREE_PATH + extension):
+                os.remove(GridManager.RTREE_PATH + extension)
+
     def __create_cells(self):
-        # self.idx = index.Index()
+        self.remove_rtree_files()
+
         p = index.Property()
         p.overwrite = True
         self.idx = index.Index('/tmp/rtree', properties=p)
