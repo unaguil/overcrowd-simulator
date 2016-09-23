@@ -1,3 +1,5 @@
+import logging
+
 
 def add_pyspark_path():
     """
@@ -28,9 +30,12 @@ class SparkTestCase(unittest.TestCase):
         conf.set("spark.cores.max", "1")
         #conf.set("spark.master", "spark://10.48.1.21:7077")
         conf.set("spark.app.name", "nosetest")
+        conf.set("spark.logConf", True)
+
+        logger = logging.getLogger("py4j")
+        logger.setLevel(logging.INFO)
 
         self.sc = SparkContext(conf=conf)
-        self.sc.setLogLevel("INFO")
 
     def tearDown(self):
         self.sc.stop()
