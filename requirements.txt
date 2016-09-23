@@ -1,13 +1,12 @@
-cycler==0.10.0
-matplotlib==1.5.3
-nose==1.3.7
-numpy==1.11.1
-pygame==1.9.2b8
--e git+https://github.com/panisson/pymobility.git@ddd604d26c7ad0dacc8165d47d8069da36fdb223#egg=pymobility
-pyparsing==2.1.9
-python-dateutil==2.5.3
-pytz==2016.6.1
-Rtree==0.8.2
+# APT dependencies
+# apt-get install libgeos-dev libspatialindex-dev libfreetype6-dev python-dev build-essential pygame
+
+# Create virtualenv
+# mkvirtualenv --system-site-packages env_name
+
+# Install requirements
+# pip install -r requirements.txt
+
+-e git+https://github.com/panisson/pymobility.git#egg=pymobility
 Shapely==1.5.12
-six==1.10.0
-spark==0.2.1
+Rtree==0.8.2
