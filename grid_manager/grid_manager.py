@@ -3,13 +3,9 @@ import numpy
 from rtree import index
 from pyspark import SparkContext, SparkConf
 
-conf = SparkConf().setAppName('GridManager')
-sc = SparkContext(conf=conf)
-
 class Cell(object):
 
-    def __init__(self, manager, position):
-        self.manager = manager
+    def __init__(self, position, cell_dimensions):
         self.position = position
 
         self.occupation = 0.0
@@ -17,8 +13,8 @@ class Cell(object):
         self.box = geometry.box(
             self.position[0],
             self.position[1],
-            self.position[0] + self.manager.cell_dimensions[0],
-            self.position[1] + self.manager.cell_dimensions[1]
+            self.position[0] + cell_dimensions[0],
+            self.position[1] + cell_dimensions[1]
         )
 
     @property
@@ -27,7 +23,8 @@ class Cell(object):
 
 class GridManager(object):
 
-    def __init__(self, dimensions, n_cells=(12, 12)):
+    def __init__(self, spark_context, dimensions, n_cells=(12, 12)):
+        self.sc = spark_context
         self.dimensions = dimensions
         self.n_cells = n_cells
 
@@ -56,7 +53,7 @@ class GridManager(object):
                     column_index * self.cell_dimensions[1]
                 )
 
-                cell = Cell(self, position)
+                cell = Cell(position, self.cell_dimensions)
                 pos = row_index * self.n_cells[0] + column_index
                 self.idx.insert(pos, cell.box.bounds)
                 row.append(cell)
@@ -73,6 +70,7 @@ class GridManager(object):
 
             total_common = 0
             common_cells = []
+
             for pos in cell_indices:
                 cell_index = (pos // columnsBroadcast.value,  pos % columnsBroadcast.value)
                 cell = cellsBroadcast.value[cell_index[0]][cell_index[1]]
@@ -94,11 +92,11 @@ class GridManager(object):
 
         self.avg_density = len(devices) / self.area
 
-        columnsBroadcast = sc.broadcast(self.columns)
-        rowsBroadcast = sc.broadcast(self.rows)
-        cellsBroadcast = sc.broadcast(self.cells)
+        columnsBroadcast = self.sc.broadcast(self.columns)
+        rowsBroadcast = self.sc.broadcast(self.rows)
+        cellsBroadcast = self.sc.broadcast(self.cells)
 
-        devicesRDD = sc.parallelize(devices)
+        devicesRDD = self.sc.parallelize(devices)
         devicesRDD = devicesRDD.map(update_device)
 
         sumRDD = devicesRDD.reduceByKey(sum_matrix)

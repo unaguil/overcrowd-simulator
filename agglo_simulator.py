@@ -3,6 +3,9 @@ from pymobility.models.mobility import RandomWaypoint
 from grid_manager.grid_manager import GridManager
 import argparse
 
+from pyspark import SparkContext
+from pyspark import SparkConf
+
 ################################################################################
 ### Simulation configuration
 N_DEVICES = 20
@@ -38,7 +41,10 @@ if __name__ == '__main__':
     print(description)
     print("============================")
 
-    g_manager = GridManager(dimensions=DIMENSIONS, n_cells=N_CELLS)
+    conf = SparkConf().setAppName('GridManager')
+    sc = SparkContext(conf=conf)
+
+    g_manager = GridManager(spark_context=sc, dimensions=DIMENSIONS, n_cells=N_CELLS)
 
     print("Avg. density %.5f devices/m^2" % (N_DEVICES / g_manager.area))
     print("Cell area: %.3f m^2" % g_manager.cell_area)
@@ -52,3 +58,5 @@ if __name__ == '__main__':
 
         density_matrix = g_manager.density_matrix
         print density_matrix
+
+    sc.stop()

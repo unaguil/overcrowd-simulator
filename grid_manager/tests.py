@@ -1,10 +1,11 @@
+import sparkunittest
 import unittest
 from device_gen import devices_generator, Device
 from grid_manager import GridManager
 import numpy
 import random
 
-class MockPositionGenerator(unittest.TestCase):
+class MockPositionGenerator():
 
     def __init__(self, nr_nodes, dimensions):
         self.nr_nodes = nr_nodes
@@ -42,10 +43,10 @@ class TestDeviceGenerator(unittest.TestCase):
             self.assertEquals(200, len(devices.keys()))
             self.assertEquals(200, len(device_ids))
 
-class TestGridManager(unittest.TestCase):
+class TestGridManager(sparkunittest.SparkTestCase):
 
     def test_grid_manager(self):
-        grid_manager = GridManager(dimensions=(250, 250), n_cells=(128, 128))
+        grid_manager = GridManager(spark_context=self.sc, dimensions=(250, 250), n_cells=(128, 128))
 
         self.assertEquals((250, 250), grid_manager.dimensions)
         self.assertEquals(62500, grid_manager.area)
@@ -74,7 +75,7 @@ class TestGridManager(unittest.TestCase):
         cell_sizes = [(2, 2), (4, 4), (8, 8), (32, 32)]
         for dimensions in dimensions_list:
             for n_cells in cell_sizes:
-                grid_manager = GridManager(dimensions=dimensions, n_cells=n_cells)
+                grid_manager = GridManager(spark_context=self.sc, dimensions=dimensions, n_cells=n_cells)
 
                 devices = [
                     Device("0", (1.0, 1.0), 1.0),
@@ -98,7 +99,7 @@ class TestGridManager(unittest.TestCase):
                 self.assertTrue(expected_avg_density, grid_manager.density_matrix.mean())
 
     def test_wall_close_density(self):
-        grid_manager = GridManager(dimensions=(4, 4), n_cells=(4, 4))
+        grid_manager = GridManager(spark_context=self.sc, dimensions=(4, 4), n_cells=(4, 4))
 
         devices = [
             Device("0", (0.0, 0.0), 1.0)
@@ -109,7 +110,7 @@ class TestGridManager(unittest.TestCase):
         self.assertTrue(numpy.isclose(1.0, grid_manager.occupation_matrix.sum()))
 
     def test_outside_area(self):
-        grid_manager = GridManager(dimensions=(4, 4), n_cells=(4, 4))
+        grid_manager = GridManager(spark_context=self.sc, dimensions=(4, 4), n_cells=(4, 4))
 
         devices = [
             Device("0", (-2.0, -2.0), 5.0)
@@ -117,10 +118,12 @@ class TestGridManager(unittest.TestCase):
 
         grid_manager.update(devices)
 
+        print grid_manager.occupation_matrix
+
         self.assertTrue(numpy.isclose(1.0, grid_manager.occupation_matrix.sum()))
 
     def test_occupation_matrix(self):
-        grid_manager = GridManager(dimensions=(8, 8), n_cells=(8, 8))
+        grid_manager = GridManager(spark_context=self.sc, dimensions=(8, 8), n_cells=(8, 8))
 
         devices = [
             Device("0", (1.0, 1.0), 1.0),
@@ -145,7 +148,7 @@ class TestGridManager(unittest.TestCase):
         self.assertTrue(numpy.allclose(expected_matrix, grid_manager.occupation_matrix))
 
     def test_check_density(self):
-        grid_manager = GridManager(dimensions=(8, 8), n_cells=(8, 8))
+        grid_manager = GridManager(spark_context=self.sc, dimensions=(8, 8), n_cells=(8, 8))
 
         devices = [
             Device("0", (1.0, 1.0), 1.0),
@@ -167,7 +170,7 @@ class TestGridManager(unittest.TestCase):
         self.assertTrue(numpy.array_equal(expected_indices, indices))
 
     def test_check_occupation(self):
-        grid_manager = GridManager(dimensions=(8, 8), n_cells=(4, 4))
+        grid_manager = GridManager(spark_context=self.sc, dimensions=(8, 8), n_cells=(4, 4))
 
         devices = [
             Device("0", (3.0, 3.0), 1.0),
