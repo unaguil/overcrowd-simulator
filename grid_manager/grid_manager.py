@@ -3,6 +3,11 @@ import numpy
 import time
 import math
 from rtree import index
+from pyspark import SparkContext, SparkConf
+
+conf = SparkConf().setAppName('GridManager')
+sc = SparkContext(conf=conf)
+
 
 def timeit(method):
 
@@ -15,6 +20,7 @@ def timeit(method):
         return result
 
     return timed
+
 
 class Cell(object):
 
@@ -34,6 +40,7 @@ class Cell(object):
     @property
     def density(self):
         return self.occupation / self.manager.cell_area
+
 
 class GridManager(object):
 
@@ -59,7 +66,10 @@ class GridManager(object):
                 self.cells[row][column].occupation = 0.0
 
     def __create_cells(self):
-        self.idx = index.Index()
+        # self.idx = index.Index()
+        p = index.Property()
+        p.overwrite = True
+        self.idx = index.Index('/tmp/rtree', properties=p)
 
         self.cells = []
         for row_index in range(self.n_cells[0]):
@@ -76,30 +86,42 @@ class GridManager(object):
                 row.append(cell)
 
             self.cells.append(row)
+        self.idx.close()
 
-    @timeit
+    # @timeit
     def update(self, devices):
-        self.__clear_cells()
-
-        self.avg_density = len(devices) / self.area
-
-        for device in devices:
-            circle = self.__create_circle(device)
-            cell_indices = self.idx.intersection(circle.bounds)
-
+        def update_device(device):
+            circle = create_circle(device)
+            idx = index.Index('/tmp/rtree')
+            cell_indices = idx.intersection(circle.bounds)
             total_common = 0
             common_cells = []
             for pos in cell_indices:
-                cell_index = (pos // self.columns,  pos % self.columns)
-                cell = self[cell_index]
+                cell_index = (pos // columnsBroadcast.value,  pos % columnsBroadcast.value)
+                cell = cellsBroadcast.value[cell_index[0]][cell_index[1]]
                 common = cell.box.intersection(circle)
                 common_cells.append((cell_index, common.area))
                 total_common += common.area
-
             missing = (circle.area - total_common) / circle.area
+            current_matrix = numpy.zeros((rowsBroadcast.value, columnsBroadcast.value))
             for cell_index, common_area in common_cells:
                 cell_ratio = common_area / float(total_common)
-                self[cell_index].occupation += common_area / circle.area + cell_ratio * missing
+                current_matrix[cell_index[0]][cell_index[1]] += common_area / circle.area + cell_ratio * missing
+
+            return ('matrix', current_matrix)
+
+        def sum_matrix(accum, n):
+            return accum + n
+
+        self.avg_density = len(devices) / self.area
+        columnsBroadcast = sc.broadcast(self.columns)
+        rowsBroadcast = sc.broadcast(self.rows)
+        cellsBroadcast = sc.broadcast(self.cells)
+        devicesRDD = sc.parallelize(devices)
+        devicesRDD = devicesRDD.map(update_device)
+        sumRDD = devicesRDD.reduceByKey(sum_matrix)
+        self.occupation_matrix = sumRDD.collect()[0][1]
+
 
     def __get_row_column(self, num):
         if num == 0:
@@ -132,16 +154,16 @@ class GridManager(object):
     def __setitem__(self, index, value):
         self.cells[index[0]][index[1]] = value
 
-    @property
-    def occupation_matrix(self):
-        matrix = []
-        for row_index in range(self.rows):
-            row = []
-            for column_index in range(self.columns):
-                row.append(self[row_index, column_index].occupation)
-            matrix.append(row)
-
-        return numpy.array(matrix)
+    # @property
+    # def occupation_matrix(self):
+    #     matrix = []
+    #     for row_index in range(self.rows):
+    #         row = []
+    #         for column_index in range(self.columns):
+    #             row.append(self[row_index, column_index].occupation)
+    #         matrix.append(row)
+    #
+    #     return numpy.array(matrix)
 
     @property
     def density_matrix(self):
@@ -177,7 +199,8 @@ class GridManager(object):
 
         return indices
 
-    def __create_circle(self, device):
-        p = geometry.point.Point(device.position)
-        c = p.buffer(device.accuracy)
-        return c
+
+def create_circle(device):
+    p = geometry.point.Point(device.position)
+    c = p.buffer(device.accuracy)
+    return c

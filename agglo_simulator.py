@@ -1,6 +1,6 @@
-from device_gen import devices_generator
+from grid_manager.device_gen import devices_generator
 from pymobility.models.mobility import RandomWaypoint
-from grid_manager import GridManager
+from grid_manager.grid_manager import GridManager
 import pygame
 import argparse
 import cProfile
@@ -18,7 +18,7 @@ DIMENSIONS = (100, 100)
 VELOCITY = (0.1, 1.4)
 ACCURACY = (0.0, 3.0)
 MAX_PAUSE_TIME = 10.0  # 10 seconds
-N_CELLS = (128, 128)
+N_CELLS = (6, 6)
 DENSITY_SCALE = (0.0, 0.2)
 ################################################################################
 SCREEN_SIZE = (518, 518)
@@ -51,41 +51,42 @@ if __name__ == '__main__':
     print(description)
     print("============================")
 
-    grid_manager = GridManager(dimensions=DIMENSIONS, n_cells=N_CELLS)
+    g_manager = GridManager(dimensions=DIMENSIONS, n_cells=N_CELLS)
 
-    print("Avg. density %.5f devices/m^2" % (N_DEVICES / grid_manager.area))
-    print("Cell area: %.3f m^2" % grid_manager.cell_area)
+    print("Avg. density %.5f devices/m^2" % (N_DEVICES / g_manager.area))
+    print("Cell area: %.3f m^2" % g_manager.cell_area)
 
     if args.profile == 0:
-        screen = pygame.display.set_mode(SCREEN_SIZE)
-        screen.fill(BLACK)
-        pygame.display.flip()
-
-        surface = pygame.Surface(N_CELLS)
+        # screen = pygame.display.set_mode(SCREEN_SIZE)
+        # screen.fill(BLACK)
+        # pygame.display.flip()
+        #
+        # surface = pygame.Surface(N_CELLS)
 
         exit = False
         while not exit:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    exit = True
+            # for event in pygame.event.get():
+            #     if event.type == pygame.QUIT:
+            #         exit = True
 
             devices = next(devices_gen)
-            grid_manager.update(devices.values())
+            g_manager.update(devices.values())
 
-            screen.fill(WHITE)
+            # screen.fill(WHITE)
 
-            density_matrix = grid_manager.density_matrix
-            for i in range(density_matrix.shape[0]):
-                for j in range(density_matrix.shape[1]):
-                    color = scale_color(density_matrix[i, j], DENSITY_SCALE)
-                    surface.set_at((i, j), color)
+            density_matrix = g_manager.density_matrix
+            print density_matrix
+            # for i in range(density_matrix.shape[0]):
+            #     for j in range(density_matrix.shape[1]):
+            #         color = scale_color(density_matrix[i, j], DENSITY_SCALE)
+            #         surface.set_at((i, j), color)
+            #
+            # pygame.transform.scale(surface, SCREEN_SIZE, screen)
 
-            pygame.transform.scale(surface, SCREEN_SIZE, screen)
-
-            pygame.display.flip()
+            # pygame.display.flip()
     else:
         print "Running profiler with %d iterations" % args.profile
-        cProfile.run('profile(devices_gen, grid_manager, args.profile)', 'stats')
+        cProfile.run('profile(devices_gen, g_manager, args.profile)', 'stats')
 
         p = pstats.Stats('stats')
         p.strip_dirs().sort_stats('cumulative').print_stats()
