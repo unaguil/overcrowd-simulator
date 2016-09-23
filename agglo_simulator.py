@@ -1,10 +1,7 @@
 from grid_manager.device_gen import devices_generator
 from pymobility.models.mobility import RandomWaypoint
 from grid_manager.grid_manager import GridManager
-import pygame
 import argparse
-import cProfile
-import pstats
 
 def profile(devices_gen, manager, num):
     for i in range(num):
@@ -56,37 +53,12 @@ if __name__ == '__main__':
     print("Avg. density %.5f devices/m^2" % (N_DEVICES / g_manager.area))
     print("Cell area: %.3f m^2" % g_manager.cell_area)
 
-    if args.profile == 0:
-        # screen = pygame.display.set_mode(SCREEN_SIZE)
-        # screen.fill(BLACK)
-        # pygame.display.flip()
-        #
-        # surface = pygame.Surface(N_CELLS)
+    exit = False
+    while not exit:
+        devices = next(devices_gen)
+        g_manager.update(devices.values())
 
-        exit = False
-        while not exit:
-            # for event in pygame.event.get():
-            #     if event.type == pygame.QUIT:
-            #         exit = True
+        # screen.fill(WHITE)
 
-            devices = next(devices_gen)
-            g_manager.update(devices.values())
-
-            # screen.fill(WHITE)
-
-            density_matrix = g_manager.density_matrix
-            print density_matrix
-            # for i in range(density_matrix.shape[0]):
-            #     for j in range(density_matrix.shape[1]):
-            #         color = scale_color(density_matrix[i, j], DENSITY_SCALE)
-            #         surface.set_at((i, j), color)
-            #
-            # pygame.transform.scale(surface, SCREEN_SIZE, screen)
-
-            # pygame.display.flip()
-    else:
-        print "Running profiler with %d iterations" % args.profile
-        cProfile.run('profile(devices_gen, g_manager, args.profile)', 'stats')
-
-        p = pstats.Stats('stats')
-        p.strip_dirs().sort_stats('cumulative').print_stats()
+        density_matrix = g_manager.density_matrix
+        print density_matrix
