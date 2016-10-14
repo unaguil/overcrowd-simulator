@@ -5,7 +5,7 @@
 Requirements
 ============
 
-* Tested with:
+* Tested with
 
   * Python 2.7
   * Spark 2.0.1 (http://spark.apache.org/)
@@ -21,7 +21,7 @@ Requirements
 Testing 
 =======
 
-Configure enviroment variables to point to your Spark installation directory.
+Configure enviroment variables to point to your Spark installation directory
 
     export SPARK_HOME=/opt/spark-2.0.1-bin-hadoop2.7
     export PYTHONPATH=$SPARK_HOME/python/lib/py4j-0.10.3-src.zip:$PYTHONPATH
