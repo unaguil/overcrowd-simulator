@@ -10,13 +10,12 @@ addons:
     - libspatialindex-dev
     - scala
 
-before_install:
-    - wget http://d3kbcqa49mib13.cloudfront.net/spark-2.0.1-bin-hadoop2.7.tgz
-    - tar xvzf spark-2.0.1-bin-hadoop2.7.tgz
-    - ls $HOME
+before_install: 
+    - wget http://d3kbcqa49mib13.cloudfront.net/spark-2.0.1-bin-hadoop2.7.tgz -O /tmp/spark-2.0.1-bin-hadoop2.7.tgz
+    - tar xvzf /tmp/spark-2.0.1-bin-hadoop2.7.tgz -C /tmp/
     - pip install -U pip
 env:
-    - SPARK_HOME=$HOME/spark-2.0.1-bin-hadoop2.7 PYTHONPATH=$SPARK_HOME/python/lib/py4j-0.10.3-src.zip:$PYTHONPATH
+    - SPARK_HOME=/tmp/spark-2.0.1-bin-hadoop2.7 PYTHONPATH=$SPARK_HOME/python/lib/py4j-0.10.3-src.zip:$PYTHONPATH
 
 install:
     - pip install -r requirements.txt
