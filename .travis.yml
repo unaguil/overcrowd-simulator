@@ -11,10 +11,11 @@ addons:
     - scala
 
 before_install:
-    - wget http://d3kbcqa49mib13.cloudfront.net/spark-2.0.0-bin-hadoop2.7.tgz
-    - tar xvzf spark-2.0.0-bin-hadoop2.7.tgz
+    - wget http://d3kbcqa49mib13.cloudfront.net/spark-2.0.1-bin-hadoop2.7.tgz
+    - tar xvzf spark-2.0.1-bin-hadoop2.7.tgz
 env:
-    - SPARK_HOME=$HOME/spark-2.0.0-bin-hadoop2.7uild:$PYTHONPATH
+    - SPARK_HOME=$HOME/spark-2.0.1-bin-hadoop2.7
+    - PYTHONPATH=$SPARK_HOME/python/lib/py4j-0.10.3-src.zip:$PYTHONPATH
 
 install:
     - pip install -r requirements.txt
