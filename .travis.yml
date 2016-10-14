@@ -9,7 +9,6 @@ addons:
     packages:
     - libspatialindex-dev
     - scala
-    - python-numpy
 
 before_install:
     - wget http://d3kbcqa49mib13.cloudfront.net/spark-2.0.1-bin-hadoop2.7.tgz
