@@ -5,6 +5,5 @@ configuration = {
     'accuracy': (0.0, 3.0),
     'max_pause_time': 10.0,  # 10 seconds
     'cells': (6, 6),
-    'update_interval': 10.00, # seconds
     'sim_total_time': 120 # seconds
 }

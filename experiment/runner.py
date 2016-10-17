@@ -40,15 +40,10 @@ if __name__ == '__main__':
         elapsed_time_sum += elapsed_time
         iterations += 1
 
-        print 'Density matrix computed in %.2f seconds' % elapsed_time
+        print 'Density matrix computed in %.2f s' % elapsed_time
 
-        density_matrix = g_manager.density_matrix
-        print density_matrix
-
-        print 'Waiting %.2f s until next update' % c['update_interval']
-        time.sleep(c['update_interval'])
-
-        sim_time += c['update_interval']
+        sim_time += elapsed_time
+        print 'Current simulation time: %.2f s' % sim_time
 
     sc.stop()
 
