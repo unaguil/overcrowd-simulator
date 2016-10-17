@@ -25,12 +25,18 @@ if __name__ == '__main__':
 
     sim_time = 0
 
+    elapsed_time_sum = 0
+    iterations = 0
+
     while sim_time < c['sim_total_time']:
         devices = next(devices_gen)
 
         start_time = time.time()
         g_manager.update(devices.values())
         elapsed_time = time.time() - start_time
+
+        elapsed_time_sum += elapsed_time
+        iterations += 1
 
         print 'Density matrix computed in %.2f seconds' % elapsed_time
 
@@ -44,4 +50,9 @@ if __name__ == '__main__':
 
     sc.stop()
 
+    avg_time = elapsed_time_sum / float(iterations)
+
     print 'Simulation finished'
+    print '==================='
+    print 'Iterations: %d' % iterations
+    print 'Avg. matrix computation time: %.2f' % avg_time
