@@ -31,6 +31,8 @@ if __name__ == '__main__':
     while sim_time < c['sim_total_time']:
         devices = next(devices_gen)
 
+        print 'Computing matrix for iteration %d' % iterations
+
         start_time = time.time()
         g_manager.update(devices.values())
         elapsed_time = time.time() - start_time
