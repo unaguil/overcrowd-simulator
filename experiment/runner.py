@@ -27,7 +27,13 @@ if __name__ == '__main__':
 
     while sim_time < c['sim_total_time']:
         devices = next(devices_gen)
+
+        start_time = time.time()
         g_manager.update(devices.values())
+        elapsed_time = time.time() - start_time
+
+        print 'Density matrix computed in %.2f seconds' % elapsed_time
+
         density_matrix = g_manager.density_matrix
         print density_matrix
 
