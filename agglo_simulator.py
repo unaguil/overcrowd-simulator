@@ -1,7 +1,6 @@
 from grid_manager.device_gen import devices_generator
 from pymobility.models.mobility import RandomWaypoint
 from grid_manager.grid_manager import GridManager
-import argparse
 
 from pyspark import SparkContext
 from pyspark import SparkConf

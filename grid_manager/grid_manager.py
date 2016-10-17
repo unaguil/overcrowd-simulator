@@ -1,7 +1,6 @@
 import shapely.geometry as geometry
 import numpy
 from rtree import index
-from pyspark import SparkContext, SparkConf
 import os
 
 class Cell(object):
@@ -15,7 +14,7 @@ class Cell(object):
             self.position[0] + cell_dimensions[0],
             self.position[1] + cell_dimensions[1]
         )
-        
+
 class GridManager(object):
 
     RTREE_PATH = '/tmp/rtree'
