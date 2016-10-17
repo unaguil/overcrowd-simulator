@@ -13,12 +13,12 @@ Requirements
 * Install APT required dependencies
 
         apt-get install libgeos-dev libspatialindex-dev
-    
-* Install Python requirements 
+
+* Install Python requirements
 
         pip install -r requirements.txt
-    
-Testing 
+
+Testing
 =======
 
 Configure enviroment variables to point to your Spark installation directory
@@ -29,3 +29,11 @@ Configure enviroment variables to point to your Spark installation directory
 Run tests with
 
     nosetests -s
+
+
+Launching sample application
+============================
+
+Launch the sample Python application locally with
+
+    spark-submit --master local agglo_simulator.py
