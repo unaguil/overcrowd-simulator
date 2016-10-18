@@ -89,6 +89,9 @@ if __name__ == '__main__':
 
         print 'Density matrix computed in %.2f s' % elapsed_time
 
+        density_matrix = g_manager.density_matrix
+        print density_matrix
+
         sim_time += elapsed_time
         print 'Current simulation time: %.2f s' % sim_time
 
