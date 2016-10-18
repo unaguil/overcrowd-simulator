@@ -15,7 +15,7 @@ import importlib
 def save_data(data, file_name):
     headers = [
         'devices', 'dimensions', 'velocity',
-        'accuracy', 'max_pause_time', 'cells',
+        'accuracy', 'max_pause_time', 'cells', 'iterations',
         'sim_total_time', 'threads', 'avg_matrix_comp_time'
     ]
 
@@ -73,19 +73,19 @@ if __name__ == '__main__':
     sim_time = 0
 
     elapsed_time_sum = 0
-    iterations = 0
+    iteration = 0
 
-    while sim_time < data['sim_total_time']:
+    while iteration < data['iterations']:
         devices = next(devices_gen)
 
-        print 'Computing matrix for iteration %d' % iterations
+        print 'Computing matrix for iteration %d/%d' % (iteration, data['iterations'])
 
         start_time = time.time()
         g_manager.update(devices.values())
         elapsed_time = time.time() - start_time
 
         elapsed_time_sum += elapsed_time
-        iterations += 1
+        iteration += 1
 
         print 'Density matrix computed in %.2f s' % elapsed_time
 
@@ -94,13 +94,14 @@ if __name__ == '__main__':
 
     sc.stop()
 
-    avg_time = elapsed_time_sum / float(iterations)
+    avg_time = elapsed_time_sum / float(data['iterations'])
 
     print 'Simulation finished'
     print '==================='
-    print 'Iterations: %d' % iterations
+    print 'Iterations: %d' % data['iterations']
     print 'Avg. matrix computation time: %.2f' % avg_time
 
     data['avg_matrix_comp_time'] = avg_time
+    data['sim_total_time'] = elapsed_time_sum
 
     save_data(data, file_name)
