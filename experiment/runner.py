@@ -11,6 +11,7 @@ import time
 import csv
 import os.path
 import sys
+import argparse
 
 def save_data(data, file_name):
     headers = [
@@ -34,9 +35,22 @@ def save_data(data, file_name):
         writer.writerow(data)
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print 'Missing parameters required'
-        sys.exit()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--threads", help="number of threads used in this experiment")
+    parser.add_argument("--output", help="file to append the experiment data")
+
+    args = parser.parse_args()
+
+    data = c
+    if args.threads:
+        data['threads'] = args.threads
+    else:
+        data['threads'] = 'Unknown'
+
+    if args.output:
+        file_name = args.output
+    else:
+        file_name = 'default_output.csv'
 
     print 'Starting simulation'
     print 'Total time: %d' % c['sim_total_time']
@@ -82,8 +96,6 @@ if __name__ == '__main__':
     print 'Iterations: %d' % iterations
     print 'Avg. matrix computation time: %.2f' % avg_time
 
-    data = c
     data['avg_matrix_comp_time'] = avg_time
-    data['threads'] = sys.argv[1]
 
-    save_data(data, sys.argv[2])
+    save_data(data, file_name)
