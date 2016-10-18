@@ -45,3 +45,6 @@ Launch all experiments (locally)
 Change to the main directory and run the following script
 
     experiment/run_all.sh
+
+The output of each experiment is written to a different CSV file in the local
+directory.
