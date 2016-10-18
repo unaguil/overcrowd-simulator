@@ -3,6 +3,9 @@ import numpy
 from rtree import index
 import os
 
+RTREE_PATH = './rtree'
+RTREE_FILES = ['.idx', '.dat']
+
 class Cell(object):
 
     def __init__(self, position, cell_dimensions):
@@ -16,9 +19,6 @@ class Cell(object):
         )
 
 class GridManager(object):
-
-    RTREE_PATH = '/tmp/rtree'
-    RTREE_FILES = ['.idx', '.dat']
 
     def __init__(self, spark_context, dimensions, n_cells=(12, 12)):
         self.sc = spark_context
@@ -36,16 +36,16 @@ class GridManager(object):
         self.__create_cells()
 
     def remove_rtree_files(self):
-        for extension in GridManager.RTREE_FILES:
-            if os.path.isfile(GridManager.RTREE_PATH + extension):
-                os.remove(GridManager.RTREE_PATH + extension)
+        for extension in RTREE_FILES:
+            if os.path.isfile(RTREE_PATH + extension):
+                os.remove(RTREE_PATH + extension)
 
     def __create_cells(self):
         self.remove_rtree_files()
 
         p = index.Property()
         p.overwrite = True
-        self.idx = index.Index('/tmp/rtree', properties=p)
+        self.idx = index.Index(RTREE_PATH, properties=p)
 
         self.cells = []
         for row_index in range(self.n_cells[0]):
@@ -68,7 +68,7 @@ class GridManager(object):
 
         def update_device(device):
             circle = create_circle(device)
-            idx = index.Index('/tmp/rtree')
+            idx = index.Index(RTREE_PATH)
             cell_indices = idx.intersection(circle.bounds)
 
             total_common = 0
