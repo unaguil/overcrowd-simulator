@@ -37,3 +37,11 @@ Launching sample application
 Launch the sample Python application locally with
 
     spark-submit --master local agglo_simulator.py
+
+
+Launch all experiments (locally)
+================================
+
+Change to the main directory and run the following script
+
+    experiment/run_all.sh
