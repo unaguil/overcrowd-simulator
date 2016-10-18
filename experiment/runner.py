@@ -8,8 +8,38 @@ from pyspark import SparkConf
 from experiment.basic_conf import configuration as c
 
 import time
+import csv
+import os.path
+import sys
+
+def save_data(data, file_name):
+    headers = [
+        'devices', 'dimensions', 'velocity',
+        'accuracy', 'max_pause_time', 'cells',
+        'sim_total_time', 'threads', 'avg_matrix_comp_time'
+    ]
+
+    file_exists = os.path.isfile(file_name)
+    if file_exists:
+        open_mode = 'a'
+    else:
+        open_mode = 'w'
+
+    with open(file_name, open_mode) as output_file:
+        writer = csv.DictWriter(output_file, fieldnames=headers)
+
+        if not file_exists:
+            writer.writeheader()
+
+        writer.writerow(data)
 
 if __name__ == '__main__':
+    data = c
+
+    if len(sys.argv) < 3:
+        print 'Missing parameters required'
+        sys.exit()
+
     print 'Starting simulation'
     print 'Total time: %d' % c['sim_total_time']
 
@@ -53,3 +83,8 @@ if __name__ == '__main__':
     print '==================='
     print 'Iterations: %d' % iterations
     print 'Avg. matrix computation time: %.2f' % avg_time
+
+    data['avg_matrix_comp_time'] = avg_time
+    data['threads'] = sys.argv[1]
+
+    save_data(data, sys.argv[2])
