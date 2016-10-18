@@ -5,13 +5,12 @@ from grid_manager.grid_manager import GridManager
 from pyspark import SparkContext
 from pyspark import SparkConf
 
-from experiment.basic_conf import configuration as c
-
 import time
 import csv
 import os.path
 import sys
 import argparse
+import importlib
 
 def save_data(data, file_name):
     headers = [
@@ -38,10 +37,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--threads", help="number of threads used in this experiment")
     parser.add_argument("--output", help="file to append the experiment data")
+    parser.add_argument("--conf", help="configuration used for this experiment")
 
     args = parser.parse_args()
 
-    data = c
+    if args.conf:
+        module = importlib.import_module(args.conf)
+        data = module.configuration
+    else:
+        from experiment.basic_conf import configuration as data
+
     if args.threads:
         data['threads'] = args.threads
     else:
@@ -53,24 +58,24 @@ if __name__ == '__main__':
         file_name = 'default_output.csv'
 
     print 'Starting simulation'
-    print 'Total time: %d' % c['sim_total_time']
+    print data
 
-    model = RandomWaypoint(nr_nodes=c['devices'], dimensions=c['dimensions'],
-        velocity=c['velocity'], wt_max=c['max_pause_time'])
+    model = RandomWaypoint(nr_nodes=data['devices'], dimensions=data['dimensions'],
+        velocity=data['velocity'], wt_max=data['max_pause_time'])
 
-    devices_gen = devices_generator(model, accuracy=c['accuracy'])
+    devices_gen = devices_generator(model, accuracy=data['accuracy'])
 
     conf = SparkConf().setAppName('GridManagerExperiment')
     sc = SparkContext(conf=conf)
 
-    g_manager = GridManager(spark_context=sc, dimensions=c['dimensions'], n_cells=c['cells'])
+    g_manager = GridManager(spark_context=sc, dimensions=data['dimensions'], n_cells=data['cells'])
 
     sim_time = 0
 
     elapsed_time_sum = 0
     iterations = 0
 
-    while sim_time < c['sim_total_time']:
+    while sim_time < data['sim_total_time']:
         devices = next(devices_gen)
 
         print 'Computing matrix for iteration %d' % iterations
