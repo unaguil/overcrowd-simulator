@@ -1,5 +1,4 @@
 #!/bin/bash
 
-experiment/threads/run.sh
-experiment/devices/run.sh
-experiment/cells/run.sh
+experiment/devices/run_threads.sh
+experiment/cells/run_threads.sh
