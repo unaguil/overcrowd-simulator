@@ -1,7 +1,7 @@
 #!/bin/bash
 rm threads.csv
 
-for i in 1 2 4 8;
+for i in 1 2 4 8 16;
 do
         echo Running with $i threads
         spark-submit --master local[$i] experiment/runner.py --threads $i --output threads.csv
