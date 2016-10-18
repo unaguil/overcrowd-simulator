@@ -34,10 +34,15 @@ def save_data(data, file_name):
         writer.writerow(data)
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     data = c
 
     if len(sys.argv) < 3:
         print 'Missing parameters required'
+=======
+    if len(sys.argv) < 2:
+        print 'Output file required'
+>>>>>>> 3fcaac1dd95dc0b1b22a26db220246456f71efde
         sys.exit()
 
     print 'Starting simulation'
@@ -84,7 +89,14 @@ if __name__ == '__main__':
     print 'Iterations: %d' % iterations
     print 'Avg. matrix computation time: %.2f' % avg_time
 
+<<<<<<< HEAD
     data['avg_matrix_comp_time'] = avg_time
     data['threads'] = sys.argv[1]
 
     save_data(data, sys.argv[2])
+=======
+    data = c
+    data['avg_matrix_comp_time'] = avg_time
+
+    save_data(data, sys.argv[1])
+>>>>>>> 3fcaac1dd95dc0b1b22a26db220246456f71efde
