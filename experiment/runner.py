@@ -11,12 +11,14 @@ import os.path
 import sys
 import argparse
 import importlib
+import numpy
 
 def save_data(data, file_name):
     headers = [
         'devices', 'dimensions', 'velocity',
         'accuracy', 'max_pause_time', 'cells', 'iterations',
-        'sim_total_time', 'threads', 'avg_matrix_comp_time', 'total_data_size'
+        'sim_total_time', 'threads', 'avg_matrix_comp_time', 'total_data_size',
+        'mean_matrix_comp_time', 'std_matrix_comp_time'
     ]
 
     file_exists = os.path.isfile(file_name)
@@ -81,6 +83,8 @@ if __name__ == '__main__':
     device_size = None
     total_data_size = 0
 
+    values = []
+
     while iteration < data['iterations']:
         devices = next(devices_gen)
 
@@ -94,6 +98,8 @@ if __name__ == '__main__':
         start_time = time.time()
         g_manager.update(devices.values())
         elapsed_time = time.time() - start_time
+
+        values.append(elapsed_time)
 
         elapsed_time_sum += elapsed_time
         iteration += 1
@@ -119,5 +125,7 @@ if __name__ == '__main__':
     data['avg_matrix_comp_time'] = avg_time
     data['sim_total_time'] = elapsed_time_sum
     data['total_data_size'] = total_data_size
+    data['mean_matrix_comp_time'] = numpy.mean(values)
+    data['std_matrix_comp_time'] = numpy.std(values)
 
     save_data(data, file_name)
