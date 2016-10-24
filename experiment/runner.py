@@ -16,7 +16,7 @@ def save_data(data, file_name):
     headers = [
         'devices', 'dimensions', 'velocity',
         'accuracy', 'max_pause_time', 'cells', 'iterations',
-        'sim_total_time', 'threads', 'avg_matrix_comp_time'
+        'sim_total_time', 'threads', 'avg_matrix_comp_time', 'total_data_size'
     ]
 
     file_exists = os.path.isfile(file_name)
@@ -32,6 +32,9 @@ def save_data(data, file_name):
             writer.writeheader()
 
         writer.writerow(data)
+
+def get_size(device):
+    return sys.getsizeof(device.id) + device.position.nbytes + sys.getsizeof(device.accuracy)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -75,8 +78,16 @@ if __name__ == '__main__':
     elapsed_time_sum = 0
     iteration = 0
 
+    device_size = None
+    total_data_size = 0
+
     while iteration < data['iterations']:
         devices = next(devices_gen)
+
+        if device_size is None:
+            device_size = get_size(devices.values()[0])
+
+        total_data_size += device_size * len(devices)
 
         print 'Computing matrix for iteration %d/%d' % (iteration, data['iterations'])
 
@@ -102,9 +113,11 @@ if __name__ == '__main__':
     print 'Simulation finished'
     print '==================='
     print 'Iterations: %d' % data['iterations']
-    print 'Avg. matrix computation time: %.2f' % avg_time
+    print 'Avg. matrix computation time (seconds): %.2f' % avg_time
+    print 'Total data size (bytes): %d' % total_data_size
 
     data['avg_matrix_comp_time'] = avg_time
     data['sim_total_time'] = elapsed_time_sum
+    data['total_data_size'] = total_data_size
 
     save_data(data, file_name)
