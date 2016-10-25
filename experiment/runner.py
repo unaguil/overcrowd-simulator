@@ -43,6 +43,7 @@ if __name__ == '__main__':
     parser.add_argument("--threads", help="number of threads used in this experiment")
     parser.add_argument("--output", help="file to append the experiment data")
     parser.add_argument("--conf", help="configuration used for this experiment")
+    parser.add_argument("--name", help="experiment name")
 
     args = parser.parse_args()
 
@@ -62,7 +63,12 @@ if __name__ == '__main__':
     else:
         file_name = 'default_output.csv'
 
-    print 'Starting simulation'
+    if args.name:
+        exp_name = args.name
+    else:
+        exp_name = 'GridManagerExperiment'
+
+    print 'Starting simulation %s' % exp_name
     print data
 
     model = RandomWaypoint(nr_nodes=data['devices'], dimensions=data['dimensions'],
@@ -70,7 +76,7 @@ if __name__ == '__main__':
 
     devices_gen = devices_generator(model, accuracy=data['accuracy'])
 
-    conf = SparkConf().setAppName('GridManagerExperiment')
+    conf = SparkConf().setAppName(exp_name)
     sc = SparkContext(conf=conf)
 
     g_manager = GridManager(spark_context=sc, dimensions=data['dimensions'], n_cells=data['cells'])
