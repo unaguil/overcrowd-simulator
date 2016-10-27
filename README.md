@@ -30,14 +30,12 @@ Run tests with
 
     nosetests -s
 
-
 Launching sample application
 ============================
 
 Launch the sample Python application locally with
 
-    spark-submit --master local agglo_simulator.py
-
+    spark-submit --master local overcrowd_simulator.py
 
 Launch all experiments (locally)
 ================================
