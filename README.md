@@ -1,6 +1,6 @@
 # Overcrowding Detection Algorithm for Spark
 
-[![Build Status](https://travis-ci.com/unaguil/agglo-simulator.svg?token=fJZNuvpQu2CHYrmKy2jB&branch=spark)](https://travis-ci.com/unaguil/agglo-simulator)
+[![Build Status](https://travis-ci.com/unaguil/overcrowd-simulator.svg?token=fJZNuvpQu2CHYrmKy2jB&branch=master)](https://travis-ci.com/unaguil/overcrowd-simulator)
 
 Requirements
 ============
