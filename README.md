@@ -1,4 +1,4 @@
-# agglo-simulator
+# Overcrowding Detection Algorithm for Spark
 
 [![Build Status](https://travis-ci.com/unaguil/agglo-simulator.svg?token=fJZNuvpQu2CHYrmKy2jB&branch=spark)](https://travis-ci.com/unaguil/agglo-simulator)
 
@@ -47,4 +47,4 @@ Change to the main directory and run the following script
     experiment/run_all.sh
 
 The output of each experiment is written to a different CSV file in the local
-directory.
+directory (devices.csv, cells.csv internal.csv).
