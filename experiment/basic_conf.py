@@ -5,5 +5,5 @@ configuration = {
     'accuracy': (0.0, 3.0),
     'max_pause_time': 10.0,  # 10 seconds
     'cells': (6, 6),
-    'iterations': 10
+    'iterations': 1
 }

@@ -2,4 +2,4 @@ from experiment.basic_conf import configuration as basic_conf
 
 configuration = basic_conf
 configuration['cells'] = (96, 96)
-configuration['devices'] = 4000
+configuration['devices'] = 100000
